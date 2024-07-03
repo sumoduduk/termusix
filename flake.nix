@@ -33,6 +33,10 @@
           ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
             pkgs.libiconv
           ];
+
+        nativeBuildInputs = with pkgs; [
+          pkg-config
+        ];
       };
 
       termusix = craneLib.buildPackage (commonArgs
@@ -59,6 +63,7 @@
 
         # Additional dev-shell environment variables can be set directly
         # MY_CUSTOM_DEVELOPMENT_VAR = "something else";
+        cls = "clear";
 
         # Extra inputs can be added here; cargo and rustc are provided by default.
         packages = [
