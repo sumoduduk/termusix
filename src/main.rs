@@ -1,9 +1,10 @@
 mod music;
+mod playlist;
 
 use serde::{Deserialize, Serialize};
 use std::env::args;
 
-#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct VideoResult {
     title: String,
