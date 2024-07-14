@@ -14,7 +14,7 @@ struct MusicInfo {
 #[derive(Serialize, Deserialize, Debug)]
 struct MusicPlaylist {
     playlist_id: String,
-    playlis_title: String,
+    playlist_title: String,
     music_list: Vec<MusicInfo>,
 }
 
