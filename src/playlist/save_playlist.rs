@@ -21,7 +21,7 @@ pub async fn get_playlist(url: &str) -> eyre::Result<MusicPlaylist> {
 
     let music_playlist = MusicPlaylist {
         playlist_id: id_playlist.to_owned(),
-        playlis_title: playlist_title.to_owned(),
+        playlist_title: playlist_title.to_owned(),
         music_list,
     };
 
@@ -40,7 +40,7 @@ fn map_music_info(videos: &[VideoResult]) -> Vec<MusicInfo> {
 }
 
 pub fn save_file_json(playlist: &[MusicPlaylist]) -> eyre::Result<()> {
-    let json_str = serde_json::to_string(playlist)?;
+    let json_str = serde_json::to_string_pretty(playlist)?;
 
     let mut file = OpenOptions::new()
         .write(true)
