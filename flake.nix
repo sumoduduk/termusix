@@ -29,7 +29,11 @@
         strictDeps = true;
 
         buildInputs =
-          [pkgs.openssl]
+          [
+            # pkgs.openssl
+            pkgs.alsa-lib
+            pkgs.dbus
+          ]
           ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
             pkgs.libiconv
           ];
