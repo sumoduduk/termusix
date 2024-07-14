@@ -1,6 +1,8 @@
 mod music;
 mod playlist;
 
+use core::panic;
+use playlist::Playlist;
 use serde::{Deserialize, Serialize};
 use std::env::args;
 
@@ -28,15 +30,24 @@ async fn main() -> eyre::Result<()> {
     let mut args = args();
     args.next();
 
-    let id = args.next().unwrap();
+    let arg = args
+        .next()
+        .expect("ERROR: argument expected => --save, --list");
 
-    let instance = "https://inv.tux.pizza";
+    dbg!(&arg);
 
-    let url = format!("{}/api/v1/playlists/{}", instance, id);
+    let mut playlist = Playlist::new()?;
 
-    let data_json: PlaylistInfo = reqwest::get(&url).await?.json().await?;
-    let pretty_json = serde_json::to_string_pretty(&data_json)?;
-    println!("{}", pretty_json);
+    match arg.trim() {
+        "--save" => {
+            let url = args.next().expect("ERROR: provide the URL");
+            playlist.save_playlist(&url).await?;
+            println!("Playlist saved..")
+        }
+        "--list" => todo!(),
+
+        _ => println!("Please provide correct argument, --save, --list"),
+    }
 
     Ok(())
 }
