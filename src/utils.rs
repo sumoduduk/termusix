@@ -52,4 +52,18 @@ mod tests {
 
         assert_eq!(&arr, &copy_arr);
     }
+
+    #[test]
+    fn test_shuffle_3() {
+        let mut arr: Vec<u32> = (1..=1_000_000).collect();
+        let copy_arr = arr.clone();
+
+        shuffle_vec(&mut arr);
+
+        assert_ne!(&arr, &copy_arr);
+
+        arr.sort();
+
+        assert_eq!(&arr, &copy_arr);
+    }
 }
