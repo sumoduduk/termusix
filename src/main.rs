@@ -44,6 +44,11 @@ async fn main() -> eyre::Result<()> {
             playlist.save_playlist(&url).await?;
             println!("Playlist saved..")
         }
+        "--save-id" => {
+            let id = args.next().expect("ERROR: provide the ID");
+            playlist.save_by_id(&id).await?;
+            println!("Playlist ID saved..")
+        }
         "--list" => {
             // playlist.list_playlist();
         }
