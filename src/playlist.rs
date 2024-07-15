@@ -38,7 +38,7 @@ impl Playlist {
 
     pub async fn save_playlist(&mut self, url: &str) -> eyre::Result<()> {
         get_playlist(self, url).await?;
-        save_file_json(self)?;
+        save_file_json(&self.0)?;
         Ok(())
     }
 
@@ -61,7 +61,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn can_init_playlist() {
+    fn test_init_playlist() {
         let struc_data = Playlist::new();
         dbg!(&struc_data);
 
