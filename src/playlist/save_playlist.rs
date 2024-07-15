@@ -1,46 +1,52 @@
-use super::{MusicInfo, MusicPlaylist};
+use super::{InfoMusicPlaylist, MusicInfo, Playlist};
 use crate::{PlaylistInfo, VideoResult};
 use eyre::OptionExt;
+use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::Write;
 
 const URL: &str = "https://inv.tux.pizza/api/v1/playlists";
 
-pub async fn get_playlist(url: &str) -> eyre::Result<MusicPlaylist> {
+pub async fn get_playlist(playlist: &mut Playlist, url: &str) -> eyre::Result<()> {
     let id_playlist = extract_playlist_id(url)?;
 
     let instance = format!("{}/{}", URL, id_playlist);
 
     let data_json: PlaylistInfo = reqwest::get(instance).await?.json().await?;
 
-    let playlist_title = &data_json.title;
+    let info_playlist = convert_playlist(&data_json);
 
+    playlist.0.insert(id_playlist.to_owned(), info_playlist);
+
+    Ok(())
+}
+
+fn convert_playlist(data_json: &PlaylistInfo) -> InfoMusicPlaylist {
+    let playlist_title = &data_json.title;
     let videos = &data_json.videos;
 
     let music_list = map_music_info(videos);
 
-    let music_playlist = MusicPlaylist {
-        playlist_id: id_playlist.to_owned(),
+    InfoMusicPlaylist {
         playlist_title: playlist_title.to_owned(),
         music_list,
-    };
-
-    Ok(music_playlist)
+    }
 }
 
-fn map_music_info(videos: &[VideoResult]) -> Vec<MusicInfo> {
-    let music_list: Vec<MusicInfo> = videos
-        .iter()
-        .map(|info_vid| MusicInfo {
-            music_id: info_vid.video_id.to_owned(),
-            music_title: info_vid.title.to_owned(),
-        })
-        .collect();
+fn map_music_info(videos: &[VideoResult]) -> MusicInfo {
+    let mut music_list: MusicInfo = HashMap::with_capacity(videos.len());
+
+    videos.iter().for_each(|info_vid| {
+        let music_id = info_vid.video_id.to_owned();
+        let music_title = info_vid.title.to_owned();
+
+        music_list.insert(music_id, music_title);
+    });
     music_list
 }
 
-pub fn save_file_json(playlist: &[MusicPlaylist]) -> eyre::Result<()> {
-    let json_str = serde_json::to_string_pretty(playlist)?;
+pub fn save_file_json(playlist: &Playlist) -> eyre::Result<()> {
+    let json_str = serde_json::to_string_pretty(&playlist)?;
 
     let mut file = OpenOptions::new()
         .write(true)
@@ -67,7 +73,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn split_url_test() -> eyre::Result<()> {
+    fn test_save_split_url_test() -> eyre::Result<()> {
         let url = "https://www.youtube.com/playlist?list=PL8noWinfnxi2uEgElXejICKtZY0_sAYK5";
         let id = extract_playlist_id(url)?;
 
@@ -76,7 +82,57 @@ mod tests {
     }
 
     #[test]
-    fn test_map_music_info() -> eyre::Result<()> {
+    fn test_save_convert() -> eyre::Result<()> {
+        let download_info = r#"
+        {
+          "title": "indo",
+          "playlistId": "PL8noWinfnxi2U48fYh2tkHLesDBUEQsJN",
+          "author": "comodo musix",
+          "videoCount": 87,
+          "videos": [{
+          "title": "Dan",
+          "videoId": "dGcGbF4ex5o",
+          "author": "Sony Music Entertainment Indonesia",
+          "lengthSeconds": 284
+        },
+        {
+          "title": "Kita",
+          "videoId": "oOXba6xE41Q",
+          "author": "Sony Music Entertainment Indonesia",
+          "lengthSeconds": 225
+        },
+        {
+          "title": "Raja",
+          "videoId": "BNYJ7NcQ7no",
+          "author": "Sony Music Entertainment Indonesia",
+          "lengthSeconds": 287
+        }]
+        }
+        "#;
+
+        let data_download: PlaylistInfo = serde_json::from_str(download_info)?;
+
+        let title = &data_download.title;
+        let info_music_playlist = convert_playlist(&data_download);
+
+        let target_music = HashMap::from([
+            ("dGcGbF4ex5o".to_string(), "Dan".to_string()),
+            ("oOXba6xE41Q".to_string(), "Kita".to_string()),
+            ("BNYJ7NcQ7no".to_string(), "Raja".to_string()),
+        ]);
+
+        let target = InfoMusicPlaylist {
+            playlist_title: title.to_owned(),
+            music_list: target_music,
+        };
+
+        assert_eq!(info_music_playlist, target);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_save_map_music_info() -> eyre::Result<()> {
         let vid_info = r#"
         [{
           "title": "Dan",
@@ -102,20 +158,11 @@ mod tests {
 
         let music_info = map_music_info(&data);
 
-        let target = vec![
-            MusicInfo {
-                music_id: "dGcGbF4ex5o".to_string(),
-                music_title: "Dan".to_string(),
-            },
-            MusicInfo {
-                music_id: "oOXba6xE41Q".to_string(),
-                music_title: "Kita".to_string(),
-            },
-            MusicInfo {
-                music_id: "BNYJ7NcQ7no".to_string(),
-                music_title: "Raja".to_string(),
-            },
-        ];
+        let target = HashMap::from([
+            ("dGcGbF4ex5o".to_string(), "Dan".to_string()),
+            ("oOXba6xE41Q".to_string(), "Kita".to_string()),
+            ("BNYJ7NcQ7no".to_string(), "Raja".to_string()),
+        ]);
 
         assert_eq!(music_info, target);
 
