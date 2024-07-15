@@ -1,7 +1,7 @@
 mod music;
 mod playlist;
+mod utils;
 
-use core::panic;
 use playlist::Playlist;
 use serde::{Deserialize, Serialize};
 use std::env::args;
