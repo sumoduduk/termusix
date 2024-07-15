@@ -1,4 +1,4 @@
-use super::{InfoMusicPlaylist, MusicInfo, Playlist};
+use super::{InfoMusicPlaylist, MusicInfo, MusicPlaylist, Playlist};
 use crate::{PlaylistInfo, VideoResult};
 use eyre::OptionExt;
 use std::collections::HashMap;
@@ -45,7 +45,7 @@ fn map_music_info(videos: &[VideoResult]) -> MusicInfo {
     music_list
 }
 
-pub fn save_file_json(playlist: &Playlist) -> eyre::Result<()> {
+pub fn save_file_json(playlist: &MusicPlaylist) -> eyre::Result<()> {
     let json_str = serde_json::to_string_pretty(&playlist)?;
 
     let mut file = OpenOptions::new()
@@ -165,6 +165,33 @@ mod tests {
         ]);
 
         assert_eq!(music_info, target);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_save_main() -> eyre::Result<()> {
+        let raw = std::fs::read_to_string("playlist.json")?;
+
+        let data_download: PlaylistInfo = serde_json::from_str(&raw)?;
+
+        let playlist_id = &data_download.playlist_id;
+
+        let info_music = convert_playlist(&data_download);
+
+        let mut music_playlist = HashMap::with_capacity(1);
+
+        music_playlist.insert(playlist_id.to_owned(), info_music);
+
+        save_file_json(&music_playlist)?;
+
+        let file_string = std::fs::read_to_string("music.json")?;
+
+        let data: MusicPlaylist = serde_json::from_str(&file_string)?;
+
+        let target = data.get(playlist_id);
+
+        assert!(target.is_some());
 
         Ok(())
     }
