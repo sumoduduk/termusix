@@ -21,6 +21,16 @@ pub async fn get_playlist(playlist: &mut Playlist, url: &str) -> eyre::Result<()
     Ok(())
 }
 
+pub async fn save_id(playlist: &mut Playlist, id: &str) -> eyre::Result<()> {
+    let instance = format!("{}/{}", URL, id);
+    let data_json: PlaylistInfo = reqwest::get(instance).await?.json().await?;
+    let info_playlist = convert_playlist(&data_json);
+
+    playlist.0.insert(id.to_owned(), info_playlist);
+
+    Ok(())
+}
+
 fn convert_playlist(data_json: &PlaylistInfo) -> InfoMusicPlaylist {
     let playlist_title = &data_json.title;
     let videos = &data_json.videos;

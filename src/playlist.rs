@@ -1,7 +1,7 @@
 mod list_music;
 mod save_playlist;
 
-use save_playlist::{get_playlist, save_file_json};
+use save_playlist::{get_playlist, save_file_json, save_id};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
@@ -38,6 +38,12 @@ impl Playlist {
 
     pub async fn save_playlist(&mut self, url: &str) -> eyre::Result<()> {
         get_playlist(self, url).await?;
+        save_file_json(&self.0)?;
+        Ok(())
+    }
+
+    pub async fn save_by_id(&mut self, id: &str) -> eyre::Result<()> {
+        save_id(self, id).await?;
         save_file_json(&self.0)?;
         Ok(())
     }
