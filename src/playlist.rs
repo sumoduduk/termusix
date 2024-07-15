@@ -42,6 +42,12 @@ impl Playlist {
         save_file_json(&self.music_playlist)?;
         Ok(())
     }
+
+    pub fn list_playlist(&self) {
+        self.music_playlist
+            .iter()
+            .for_each(|p| println!("{list_id}", list_id = p.playlist_id));
+    }
 }
 
 #[cfg(test)]
