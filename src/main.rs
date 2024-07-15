@@ -50,7 +50,17 @@ async fn main() -> eyre::Result<()> {
             println!("Playlist ID saved..")
         }
         "--list" => {
-            // playlist.list_playlist();
+            playlist.list_playlist();
+        }
+
+        "--play" => {
+            let id = args.next().expect("ERROR: provide the ID");
+            let list_id = playlist.list_shuffled_music_id(&id);
+
+            match list_id {
+                Ok(list) => list.iter().for_each(|ids| println!("{ids}")),
+                Err(error) => println!("{error}"),
+            }
         }
 
         _ => println!("Please provide correct argument, --save, --list"),

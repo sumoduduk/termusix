@@ -1,10 +1,13 @@
 mod list_music;
 mod save_playlist;
 
+use eyre::OptionExt;
 use save_playlist::{get_playlist, save_file_json, save_id};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
+
+use crate::utils::shuffle_vec;
 
 // #[derive(Serialize, Deserialize, Debug, PartialEq)]
 // struct MusicInfo {
@@ -48,17 +51,27 @@ impl Playlist {
         Ok(())
     }
 
-    // pub fn list_playlist(&self) {
-    //     self.music_playlist.iter().for_each(|p| {
-    //         let list_id = &p.playlist_id;
-    //         let title_list = &p.playlist_title;
-    //
-    //         println!("{title_list} - {list_id}")
-    //     });
-    // }
+    pub fn list_playlist(&self) {
+        let music_playlist = &self.0;
 
-    pub fn list_shuffled_music_id(&self, id: &str) {
-        todo!()
+        for (id, info_playlist) in music_playlist {
+            let title = &info_playlist.playlist_title;
+
+            println!("{id} - {title}");
+        }
+    }
+
+    pub fn list_shuffled_music_id(&self, id: &str) -> eyre::Result<Vec<&String>> {
+        let music_playlist = &self.0;
+
+        let info_playlist = music_playlist
+            .get(id)
+            .ok_or_eyre("ERROR: Id playlist not found")?;
+
+        let mut music_ids: Vec<&String> = info_playlist.music_list.keys().collect();
+        shuffle_vec(&mut music_ids);
+
+        Ok(music_ids)
     }
 }
 
