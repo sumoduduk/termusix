@@ -45,7 +45,7 @@ async fn main() -> eyre::Result<()> {
             println!("Playlist saved..")
         }
         "--list" => {
-            playlist.list_playlist();
+            // playlist.list_playlist();
         }
 
         _ => println!("Please provide correct argument, --save, --list"),
