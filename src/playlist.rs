@@ -1,3 +1,4 @@
+mod list_music;
 mod save_playlist;
 
 use save_playlist::{get_playlist, save_file_json};
@@ -43,9 +44,16 @@ impl Playlist {
     }
 
     pub fn list_playlist(&self) {
-        self.music_playlist
-            .iter()
-            .for_each(|p| println!("{list_id}", list_id = p.playlist_id));
+        self.music_playlist.iter().for_each(|p| {
+            let list_id = &p.playlist_id;
+            let title_list = &p.playlist_title;
+
+            println!("{title_list} - {list_id}")
+        });
+    }
+
+    pub fn list_shuffled_music_id(&self, id: &str) {
+        todo!()
     }
 }
 
