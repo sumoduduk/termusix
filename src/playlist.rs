@@ -1,4 +1,3 @@
-mod list_playlist;
 mod save_playlist;
 
 use save_playlist::{get_playlist, save_file_json};

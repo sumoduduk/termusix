@@ -44,7 +44,9 @@ async fn main() -> eyre::Result<()> {
             playlist.save_playlist(&url).await?;
             println!("Playlist saved..")
         }
-        "--list" => todo!(),
+        "--list" => {
+            playlist.list_playlist();
+        }
 
         _ => println!("Please provide correct argument, --save, --list"),
     }
