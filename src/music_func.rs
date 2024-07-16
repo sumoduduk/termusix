@@ -4,7 +4,7 @@ mod music_util;
 use download::download_music;
 use music_util::get_path;
 use rodio::{OutputStream, Sink};
-use std::{collections::VecDeque, fs::File, io::sink};
+use std::{collections::VecDeque, fs::File, thread};
 use tokio::sync::mpsc;
 
 use crate::file_ops::check_file_exist;
@@ -53,28 +53,59 @@ pub async fn play(music_paths: Vec<String>) -> eyre::Result<()> {
             OutputStream::try_default().expect("ERROR: error getting OutputStream");
         let sink = Sink::try_new(&stram_handle).expect("ERROR: play new sink");
 
+        let mut playlist = VecDeque::with_capacity(len);
+
         println!("STARTING PLAYLIST");
 
         while let Some(music_file) = rx.blocking_recv() {
             println!("append {} to playlist", &music_file);
 
-            // playlist.push_back(music_file.to_owned());
-            let file = File::open(&music_file).expect("ERROR: can't open a file in {music_file}");
+            if sink.empty() {
+                let file =
+                    File::open(&music_file).expect("ERROR: can't open a file in {music_file}");
 
-            println!("DECODING: {}", &music_file);
+                println!("DECODING: {}", &music_file);
 
-            match rodio::Decoder::new(file) {
-                Ok(source) => {
-                    println!("NOW PLAYING : {}", &music_file);
-                    sink.append(source)
+                match rodio::Decoder::new(file) {
+                    Ok(source) => {
+                        println!("NOW PLAYING : {}", &music_file);
+                        sink.append(source)
+                    }
+                    Err(err) => {
+                        eprintln!("ERROR: can't add {} into playlist {err}", &music_file)
+                    }
                 }
-                Err(err) => {
-                    eprintln!("ERROR: can't add {} into playlist {err}", &music_file)
-                }
+            } else {
+                playlist.push_back(music_file.to_owned());
             }
         }
 
-        sink.sleep_until_end();
+        loop {
+            if playlist.is_empty() {
+                break;
+            }
+
+            if sink.empty() {
+                if let Some(music_file) = playlist.pop_front() {
+                    let file =
+                        File::open(&music_file).expect("ERROR: can't open a file in {music_file}");
+
+                    println!("DECODING: {}", &music_file);
+
+                    match rodio::Decoder::new(file) {
+                        Ok(source) => {
+                            println!("NOW PLAYING : {}", &music_file);
+                            sink.append(source)
+                        }
+                        Err(err) => {
+                            eprintln!("ERROR: can't add {} into playlist {err}", &music_file)
+                        }
+                    }
+                }
+            }
+
+            thread::sleep(std::time::Duration::from_millis(900));
+        }
     });
 
     handles.push(handle_sync);
