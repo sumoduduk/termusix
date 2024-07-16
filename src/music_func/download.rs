@@ -1,8 +1,11 @@
-use std::path::Path;
+mod convert;
 
-use eyre::Context;
+use convert::convert_codec;
 use rusty_ytdl::{Video, VideoOptions, VideoQuality, VideoSearchOptions};
-pub async fn download_music(id: &str, path_file: &str) -> eyre::Result<()> {
+use std::{path::Path, process::Output};
+
+pub async fn download_music(id: &str) -> eyre::Result<Output> {
+    let path_file = ["music/", id, ".webm"].concat();
     println!("begin download music to : {}", path_file);
 
     let opt = VideoOptions {
@@ -13,14 +16,12 @@ pub async fn download_music(id: &str, path_file: &str) -> eyre::Result<()> {
 
     let video = Video::new_with_options(id, opt)?;
 
-    let path = Path::new(path_file);
+    let path = Path::new(&path_file);
 
-    let res = video
-        .download(path)
-        .await
-        .wrap_err_with(|| format!("ERROR: Downloading music in {}", path_file));
+    video.download(path).await?;
 
-    res
+    let output = convert_codec(id).await?;
+    Ok(output)
 }
 
 #[cfg(test)]
@@ -32,7 +33,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_download_1() -> eyre::Result<()> {
-        let res = download_music(ID, "music/Rgszfmk7ti0.mp3").await;
+        let res = download_music(ID).await;
         dbg!(&res);
 
         assert!(res.is_ok());
