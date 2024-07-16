@@ -1,4 +1,3 @@
-mod list_music;
 mod save_playlist;
 
 use eyre::OptionExt;
@@ -61,14 +60,15 @@ impl Playlist {
         }
     }
 
-    pub fn list_shuffled_music_id(&self, id: &str) -> eyre::Result<Vec<&String>> {
+    pub fn list_shuffled_music_id(&self, id: &str) -> eyre::Result<Vec<String>> {
         let music_playlist = &self.0;
 
         let info_playlist = music_playlist
             .get(id)
             .ok_or_eyre("ERROR: Id playlist not found")?;
 
-        let mut music_ids: Vec<&String> = info_playlist.music_list.keys().collect();
+        let mut music_ids: Vec<String> =
+            info_playlist.music_list.keys().map(|s| s.into()).collect();
         shuffle_vec(&mut music_ids);
 
         Ok(music_ids)
