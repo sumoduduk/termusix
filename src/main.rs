@@ -1,12 +1,19 @@
 mod file_ops;
 mod music_func;
 mod playlist;
+mod user_interface;
 mod utils;
 
+use handler::handle_key_events;
 use music_func::play;
 use playlist::Playlist;
+use ratatui::{backend::CrosstermBackend, Terminal};
 use serde::{Deserialize, Serialize};
 use std::env::args;
+use std::io;
+
+use user_interface::event::Event;
+use user_interface::*;
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -63,6 +70,34 @@ async fn main() -> eyre::Result<()> {
                 Ok(list) => play(list).await?,
                 Err(error) => println!("{error}"),
             }
+        }
+
+        "--ui" => {
+            // Create an application.
+            let mut app = app::App::new();
+
+            // Initialize the terminal user interface.
+            let backend = CrosstermBackend::new(io::stderr());
+            let terminal = Terminal::new(backend)?;
+            let events = event::EventHandler::new(250);
+            let mut tui = tui::Tui::new(terminal, events);
+            tui.init();
+
+            // Start the main loop.
+            while app.running {
+                // Render the user interface.
+                tui.draw(&mut app)?;
+                // Handle events.
+                match tui.events.next() {
+                    Event::Tick => app.tick(),
+                    Event::Key(key_event) => handle_key_events(key_event, &mut app)?,
+                    Event::Mouse(_) => {}
+                    Event::Resize(_, _) => {}
+                }
+            }
+
+            // Exit the user interface.
+            tui.exit()?;
         }
 
         _ => println!("Please provide correct argument, --save, --list, --play"),
