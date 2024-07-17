@@ -1,3 +1,6 @@
+use ratatui::{buffer::Buffer, layout::Rect, widgets::Widget};
+
+mod ui;
 // use std::error;
 
 /// Application result type.
@@ -46,5 +49,11 @@ impl App {
         if let Some(res) = self.counter.checked_sub(1) {
             self.counter = res;
         }
+    }
+}
+
+impl Widget for &mut App {
+    fn render(self, area: Rect, buf: &mut Buffer) {
+        ui::render(self, area, buf);
     }
 }
