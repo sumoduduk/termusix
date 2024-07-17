@@ -1,5 +1,11 @@
+/// Application.
 pub mod app;
+
+/// Terminal events handler.
 pub mod event;
-pub mod handler;
+
+/// Terminal user interface.
 pub mod tui;
-pub mod ui;
+
+/// Event handler.
+pub mod handler;
