@@ -9,14 +9,18 @@ use super::App;
 
 pub fn render(app: &mut App, area: Rect, buf: &mut Buffer) {
     use Constraint::*;
-    let horizontal = Layout::horizontal([Percentage(35), Percentage(65)]);
-    let [main_layout, playlist_layout] = horizontal.areas(area);
+    let horizontal_screen = Layout::horizontal([Percentage(35), Percentage(65)]);
+    let [main_layout, music_list] = horizontal_screen.areas(area);
+    let main_frame = Layout::vertical([Percentage(50), Percentage(50)]);
+    let [playback_layout, playlist_layout] = main_frame.areas(main_layout);
 
-    let main_block = Block::new().title("Main").borders(Borders::ALL);
+    let playback_block = Block::new().title("Playback").borders(Borders::ALL);
     let playlist_block = Block::new().title("Playlist").borders(Borders::ALL);
+    let music_block = Block::new().title("Music List").borders(Borders::ALL);
 
-    main_block.render(main_layout, buf);
+    playback_block.render(playback_layout, buf);
     playlist_block.render(playlist_layout, buf);
+    music_block.render(music_list, buf);
 
     // Paragraph::new(format!(
     //     "This is a tui template.\n\
