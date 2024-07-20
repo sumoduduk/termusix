@@ -1,14 +1,8 @@
 use ratatui::{
     buffer::Buffer,
     layout::{Constraint, Layout, Rect},
-    style::{
-        palette::tailwind::{self, SLATE},
-        Color, Modifier, Style,
-    },
-    symbols::block,
-    widgets::{
-        Block, BorderType, Borders, HighlightSpacing, List, Paragraph, StatefulWidget, Tabs, Widget,
-    },
+    style::{palette::tailwind::SLATE, Modifier, Style},
+    widgets::{Block, BorderType, Borders, HighlightSpacing, List, StatefulWidget, Widget},
 };
 
 use super::App;
@@ -41,7 +35,9 @@ pub fn render(app: &mut App, area: Rect, buf: &mut Buffer) {
         .border_type(BorderType::Rounded)
         .border_style(app.get_border_color(ListMusic));
 
-    let musics = app.music_list.get_list();
+    let indx = app.tabs_playlist.selected();
+
+    let musics = app.playlist.list_shuffled_music(indx);
 
     let music_list = List::new(musics)
         .block(music_block)
@@ -79,17 +75,15 @@ pub fn render(app: &mut App, area: Rect, buf: &mut Buffer) {
     // .render(area, buf);
 }
 
-fn render_tab(app: &App, area: Rect, buf: &mut Buffer, block: Block) {
+fn render_tab(app: &mut App, area: Rect, buf: &mut Buffer, block: Block) {
+    // let hg_style = (Color::default(), tailwind::BLUE.c500);
     let titles = app.playlist.list_playlist_titles();
-    let hg_style = (Color::default(), tailwind::BLUE.c500);
 
-    let selected = app.tabs_playlist;
-
-    Tabs::new(titles)
-        .select(selected)
-        .highlight_style(hg_style)
-        .padding("", "")
-        .divider(" ")
+    let list = List::new(titles)
         .block(block)
-        .render(area, buf);
+        .highlight_style(SELECTED_STYLE)
+        .highlight_symbol(">")
+        .highlight_spacing(HighlightSpacing::Always);
+
+    StatefulWidget::render(list, area, buf, &mut app.tabs_playlist);
 }
