@@ -29,18 +29,23 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
         }
 
         KeyCode::Char('j') => match app.screen_state {
-            Screen::Playback => {}
-            Screen::Playlist => app.next_tab(),
+            Screen::Playlist => {
+                app.tabs_playlist.select_next();
+            }
             Screen::ListMusic => {
                 app.music_list.list_state.select_next();
             }
+
+            _ => {}
         },
         KeyCode::Char('k') => match app.screen_state {
-            Screen::Playback => {}
-            Screen::Playlist => app.prev_tab(),
+            Screen::Playlist => {
+                app.tabs_playlist.select_previous();
+            }
             Screen::ListMusic => {
                 app.music_list.list_state.select_previous();
             }
+            _ => {}
         },
         // Other handlers you could add here.
         _ => {}
