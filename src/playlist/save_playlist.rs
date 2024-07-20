@@ -1,7 +1,7 @@
 use super::{InfoMusicPlaylist, MusicInfo, MusicPlaylist, Playlist};
 use crate::{PlaylistInfo, VideoResult};
 use eyre::OptionExt;
-use std::collections::HashMap;
+use indexmap::IndexMap;
 use std::fs::OpenOptions;
 use std::io::Write;
 
@@ -44,7 +44,7 @@ fn convert_playlist(data_json: &PlaylistInfo) -> InfoMusicPlaylist {
 }
 
 fn map_music_info(videos: &[VideoResult]) -> MusicInfo {
-    let mut music_list: MusicInfo = HashMap::with_capacity(videos.len());
+    let mut music_list: MusicInfo = IndexMap::with_capacity(videos.len());
 
     videos.iter().for_each(|info_vid| {
         let music_id = info_vid.video_id.to_owned();
@@ -125,7 +125,7 @@ mod tests {
         let title = &data_download.title;
         let info_music_playlist = convert_playlist(&data_download);
 
-        let target_music = HashMap::from([
+        let target_music = IndexMap::from([
             ("dGcGbF4ex5o".to_string(), "Dan".to_string()),
             ("oOXba6xE41Q".to_string(), "Kita".to_string()),
             ("BNYJ7NcQ7no".to_string(), "Raja".to_string()),
@@ -168,7 +168,7 @@ mod tests {
 
         let music_info = map_music_info(&data);
 
-        let target = HashMap::from([
+        let target = IndexMap::from([
             ("dGcGbF4ex5o".to_string(), "Dan".to_string()),
             ("oOXba6xE41Q".to_string(), "Kita".to_string()),
             ("BNYJ7NcQ7no".to_string(), "Raja".to_string()),
@@ -189,7 +189,7 @@ mod tests {
 
         let info_music = convert_playlist(&data_download);
 
-        let mut music_playlist = HashMap::with_capacity(1);
+        let mut music_playlist = IndexMap::with_capacity(1);
 
         music_playlist.insert(playlist_id.to_owned(), info_music);
 
