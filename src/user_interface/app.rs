@@ -1,8 +1,13 @@
 use music_list::MusicList;
-use ratatui::{buffer::Buffer, layout::Rect, style::Style, widgets::Widget};
+use ratatui::{
+    buffer::Buffer,
+    layout::Rect,
+    style::Style,
+    widgets::{ListState, Widget},
+};
 use screen::{get_border_color, Screen};
 
-use crate::playlist::{self, Playlist};
+use crate::playlist::Playlist;
 
 mod music_list;
 pub mod screen;
@@ -23,7 +28,7 @@ pub struct App {
     pub music_list: MusicList,
     pub screen_state: Screen,
     pub playlist: Playlist,
-    pub tabs_playlist: usize,
+    pub tabs_playlist: ListState,
 }
 
 impl Default for App {
@@ -36,7 +41,7 @@ impl Default for App {
             music_list: MusicList::default(),
             screen_state: Screen::default(),
             playlist,
-            tabs_playlist: 0,
+            tabs_playlist: ListState::default(),
         }
     }
 }
@@ -61,27 +66,27 @@ impl App {
         }
     }
 
-    pub fn next_tab(&mut self) {
-        let len = self.playlist.list_playlist_titles().len();
-        let i = self.tabs_playlist;
-
-        if i >= len {
-            self.tabs_playlist = 0;
-        } else {
-            self.tabs_playlist += 1;
-        }
-    }
-
-    pub fn prev_tab(&mut self) {
-        let len = self.playlist.list_playlist_titles().len();
-        let i = self.tabs_playlist;
-
-        if i == 0 {
-            self.tabs_playlist = len - 1;
-        } else {
-            self.tabs_playlist -= 1;
-        }
-    }
+    // pub fn next_tab(&mut self) {
+    //     let len = self.playlist.list_playlist_titles().len();
+    //     let i = self.tabs_playlist;
+    //
+    //     if i >= len {
+    //         self.tabs_playlist = 0;
+    //     } else {
+    //         self.tabs_playlist += 1;
+    //     }
+    // }
+    //
+    // pub fn prev_tab(&mut self) {
+    //     let len = self.playlist.list_playlist_titles().len();
+    //     let i = self.tabs_playlist;
+    //
+    //     if i == 0 {
+    //         self.tabs_playlist = len - 1;
+    //     } else {
+    //         self.tabs_playlist -= 1;
+    //     }
+    // }
 
     pub fn decrement_counter(&mut self) {
         if let Some(res) = self.counter.checked_sub(1) {
