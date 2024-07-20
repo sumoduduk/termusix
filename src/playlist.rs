@@ -60,6 +60,16 @@ impl Playlist {
         }
     }
 
+    pub fn list_playlist_titles(&self) -> Vec<String> {
+        let music_playlist = &self.0;
+
+        let titles: Vec<String> = music_playlist
+            .values()
+            .map(|t| t.playlist_title.to_owned())
+            .collect();
+        titles
+    }
+
     pub fn list_shuffled_music_id(&self, id: &str) -> eyre::Result<Vec<String>> {
         let music_playlist = &self.0;
 
