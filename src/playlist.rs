@@ -1,9 +1,9 @@
 mod save_playlist;
 
 use eyre::OptionExt;
+use indexmap::IndexMap;
 use save_playlist::{get_playlist, save_file_json, save_id};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::fs;
 
 use crate::utils::shuffle_vec;
@@ -14,7 +14,7 @@ use crate::utils::shuffle_vec;
 //     music_title: String,
 // }
 
-type MusicInfo = HashMap<String, String>;
+type MusicInfo = IndexMap<String, String>;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 struct InfoMusicPlaylist {
@@ -22,7 +22,7 @@ struct InfoMusicPlaylist {
     music_list: MusicInfo,
 }
 
-type MusicPlaylist = HashMap<String, InfoMusicPlaylist>;
+type MusicPlaylist = IndexMap<String, InfoMusicPlaylist>;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Playlist(MusicPlaylist);
@@ -69,6 +69,33 @@ impl Playlist {
             .collect();
         titles
     }
+
+    pub fn list_shuffled_music(&self, indx: Option<usize>) -> Vec<String> {
+        if let Some(indx) = indx {
+            if let Some(info_playlist) = self.0.get_index(indx) {
+                let music_list = &info_playlist.1.music_list;
+                let mut music_list: Vec<String> =
+                    music_list.values().map(|s| s.to_owned()).collect();
+
+                shuffle_vec(&mut music_list);
+                music_list
+            } else {
+                Vec::new()
+            }
+        } else {
+            Vec::new()
+        }
+    }
+
+    // pub fn list_music(&self, id: &str) -> Option<&MusicInfo> {
+    //     let music_playlist = &self.0;
+    //
+    //     if let Some(info_playlist) = music_playlist.ge(id) {
+    //         Some(&info_playlist.music_list)
+    //     } else {
+    //         None
+    //     }
+    // }
 
     pub fn list_shuffled_music_id(&self, id: &str) -> eyre::Result<Vec<String>> {
         let music_playlist = &self.0;
