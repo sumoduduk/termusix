@@ -42,9 +42,16 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>) {
                         sink.clear();
                     }
                     PlaybackEvent::Backward => {
-                        if let Some(id) = playlist.pop_back() {
-                            playlist.push_front(id);
-                            sink.clear();
+                        if !playlist.is_empty() {
+                            if let Some(id) = playlist.pop_back() {
+                                playlist.push_front(id);
+
+                                if let Some(id_2) = playlist.pop_back() {
+                                    playlist.push_front(id_2);
+                                }
+
+                                sink.clear();
+                            }
                         }
                     } // _ => {}
                 }
@@ -55,12 +62,10 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>) {
                     let file =
                         File::open(&music_file).expect("ERROR: can't open a file in {music_file}");
 
-                    println!("DECODING: {}", &music_file);
-
                     match rodio::Decoder::new(file) {
                         Ok(source) => {
-                            println!("NOW PLAYING : {}", &music_file);
-                            sink.append(source)
+                            sink.append(source);
+                            sink.play();
                         }
                         Err(err) => {
                             eprintln!("ERROR: can't add {} into playlist {err}", &music_file)
