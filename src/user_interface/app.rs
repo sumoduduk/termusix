@@ -107,6 +107,13 @@ impl App {
     pub fn get_border_color(&self, screen: Screen) -> Style {
         get_border_color(&self.screen_state, screen)
     }
+
+    pub fn list_playlist_music(&mut self, indx: Option<usize>) {
+        let music_l = self.playlist.list_music_by_idx(indx);
+        if let Some(list) = music_l {
+            self.music_list.append_music(list.into_values().collect())
+        }
+    }
 }
 
 impl Widget for &mut App {
