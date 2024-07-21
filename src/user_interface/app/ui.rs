@@ -36,8 +36,9 @@ pub fn render(app: &mut App, area: Rect, buf: &mut Buffer) {
         .border_style(app.get_border_color(ListMusic));
 
     let indx = app.tabs_playlist.selected();
+    app.list_playlist_music(indx);
 
-    let musics = app.playlist.list_shuffled_music(indx);
+    let musics = app.music_list.get_list().clone();
 
     let music_list = List::new(musics)
         .block(music_block)
