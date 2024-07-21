@@ -13,7 +13,6 @@ use ratatui::{backend::CrosstermBackend, Terminal};
 use serde::{Deserialize, Serialize};
 use std::env::args;
 use std::io;
-use tokio::sync::mpsc;
 
 use user_interface::event::Event;
 use user_interface::*;
@@ -78,7 +77,7 @@ async fn main() -> eyre::Result<()> {
         "--ui" => {
             // Create an application.
 
-            let (tx, mut rx) = mpsc::channel(10);
+            let (tx, rx) = std::sync::mpsc::channel();
 
             let mut app = app::App::new(tx);
             // Initialize the terminal user interface.
