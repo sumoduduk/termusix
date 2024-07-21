@@ -1,16 +1,19 @@
 mod file_ops;
 mod music_func;
+mod playback;
 mod playlist;
 mod user_interface;
 mod utils;
 
 use handler::handle_key_events;
 use music_func::play;
+use playback::start_playing;
 use playlist::Playlist;
 use ratatui::{backend::CrosstermBackend, Terminal};
 use serde::{Deserialize, Serialize};
 use std::env::args;
 use std::io;
+use tokio::sync::mpsc;
 
 use user_interface::event::Event;
 use user_interface::*;
@@ -74,14 +77,17 @@ async fn main() -> eyre::Result<()> {
 
         "--ui" => {
             // Create an application.
-            let mut app = app::App::new();
 
+            let (tx, mut rx) = mpsc::channel(10);
+
+            let mut app = app::App::new(tx);
             // Initialize the terminal user interface.
             let backend = CrosstermBackend::new(io::stderr());
             let terminal = Terminal::new(backend)?;
             let events = event::EventHandler::new(250);
             let mut tui = tui::Tui::new(terminal, events);
             tui.init()?;
+            start_playing(rx);
 
             // Start the main loop.
             while app.running {
@@ -90,7 +96,7 @@ async fn main() -> eyre::Result<()> {
                 // Handle events.
                 match tui.events.next().await? {
                     Event::Tick => app.tick(),
-                    Event::Key(key_event) => handle_key_events(key_event, &mut app)?,
+                    Event::Key(key_event) => handle_key_events(key_event, &mut app).await?,
                     Event::Mouse(_) => {}
                     Event::Resize(_, _) => {}
                 }
