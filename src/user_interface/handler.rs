@@ -47,6 +47,15 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
             }
             _ => {}
         },
+
+        KeyCode::Char('s') => match app.screen_state {
+            Screen::Playlist => {}
+            Screen::ListMusic => {
+                app.music_list.shuffle();
+            }
+            _ => {}
+        },
+
         // Other handlers you could add here.
         _ => {}
     }
