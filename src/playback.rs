@@ -8,6 +8,7 @@ pub enum PlaybackEvent {
     PauseToggle,
     Forward,
     Backward,
+    Quit,
 }
 
 pub fn start_playing(rx: Receiver<PlaybackEvent>) {
@@ -17,17 +18,14 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>) {
         let sink = Sink::try_new(&stram_handle).expect("ERROR: play new sink");
 
         let mut playlist = VecDeque::new();
+        let mut is_played = true;
 
-        loop {
+        while is_played {
             if let Ok(evt) = rx.try_recv() {
                 match evt {
                     PlaybackEvent::Playlist(list) => {
-                        if !playlist.is_empty() {
-                            sink.clear();
-                        }
-                        for li in list {
-                            playlist.push_back(li);
-                        }
+                        playlist = VecDeque::from(list);
+                        sink.clear();
                     }
                     PlaybackEvent::PauseToggle => {
                         if sink.is_paused() {
@@ -36,7 +34,19 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>) {
                             sink.pause();
                         }
                     }
-                    _ => {}
+                    PlaybackEvent::Quit => {
+                        sink.clear();
+                        is_played = false;
+                    }
+                    PlaybackEvent::Forward => {
+                        sink.clear();
+                    }
+                    PlaybackEvent::Backward => {
+                        if let Some(id) = playlist.pop_back() {
+                            playlist.push_front(id);
+                            sink.clear();
+                        }
+                    } // _ => {}
                 }
             }
 
@@ -56,8 +66,10 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>) {
                             eprintln!("ERROR: can't add {} into playlist {err}", &music_file)
                         }
                     }
+                    playlist.push_back(music_file);
                 }
             }
+            std::thread::sleep(std::time::Duration::from_millis(900));
         }
     });
 }
