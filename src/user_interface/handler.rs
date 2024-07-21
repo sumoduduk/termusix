@@ -4,7 +4,7 @@ use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use super::app::screen::Screen;
 
 /// Handles the key events and updates the state of [`App`].
-pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
+pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
     match key_event.code {
         // Exit application on `ESC` or `q`
         KeyCode::Esc | KeyCode::Char('q') => {
@@ -17,13 +17,9 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
             }
         }
         // Counter handlers
-        KeyCode::Right => {
-            app.increment_counter();
-        }
-        KeyCode::Left => {
-            app.decrement_counter();
-        }
-
+        // KeyCode::Right => {
+        //     app.increment_counter();
+        // }
         KeyCode::Tab => {
             app.next_screen();
         }
@@ -33,7 +29,7 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
                 app.tabs_playlist.select_next();
             }
             Screen::ListMusic => {
-                app.music_list.list_state.select_next();
+                app.music_list.select_next();
             }
 
             _ => {}
@@ -43,15 +39,14 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
                 app.tabs_playlist.select_previous();
             }
             Screen::ListMusic => {
-                app.music_list.list_state.select_previous();
+                app.music_list.select_previous();
             }
             _ => {}
         },
 
-        KeyCode::Char('s') => match app.screen_state {
-            Screen::Playlist => {}
-            Screen::ListMusic => {
-                app.music_list.shuffle();
+        KeyCode::Char('p') => match app.screen_state {
+            Screen::Playlist => {
+                app.play_music().await;
             }
             _ => {}
         },
