@@ -55,6 +55,7 @@ impl App {
 
     /// Set running to false to quit the application.
     pub fn quit(&mut self) {
+        let _ = self.tx_playback.send(PlaybackEvent::Quit);
         self.running = false;
     }
 
@@ -97,6 +98,14 @@ impl App {
 
     pub fn pause_toggle(&self) {
         let _ = self.tx_playback.send(PlaybackEvent::PauseToggle);
+    }
+
+    pub fn next_music(&self) {
+        let _ = self.tx_playback.send(PlaybackEvent::Forward);
+    }
+
+    pub fn prev_music(&self) {
+        let _ = self.tx_playback.send(PlaybackEvent::Backward);
     }
 }
 
