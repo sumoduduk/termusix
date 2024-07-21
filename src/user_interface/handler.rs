@@ -54,6 +54,14 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<
         KeyCode::Char(' ') => {
             app.pause_toggle();
         }
+
+        KeyCode::PageUp => {
+            app.next_music();
+        }
+
+        KeyCode::PageDown => {
+            app.prev_music();
+        }
         // Other handlers you could add here.
         _ => {}
     }
