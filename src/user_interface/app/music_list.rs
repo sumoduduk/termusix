@@ -1,5 +1,7 @@
 use ratatui::widgets::ListState;
 
+use crate::utils::shuffle_vec;
+
 #[derive(Debug)]
 pub struct MusicList {
     pub list_state: ListState,
@@ -8,10 +10,10 @@ pub struct MusicList {
 
 impl Default for MusicList {
     fn default() -> Self {
-        let list = ["Laruku", "KingGnU", "Popolocrois", "Aot"];
+        let list = [].to_vec();
         MusicList {
             list_state: ListState::default(),
-            musics: list.into_iter().map(|m| m.to_owned()).collect(),
+            musics: list,
         }
     }
 }
@@ -19,5 +21,13 @@ impl Default for MusicList {
 impl MusicList {
     pub fn get_list(&self) -> Vec<String> {
         self.musics.to_owned()
+    }
+
+    pub fn shuffle(&mut self) {
+        shuffle_vec(&mut self.musics)
+    }
+
+    pub fn append_music(&mut self, list: Vec<String>) {
+        self.musics = list;
     }
 }
