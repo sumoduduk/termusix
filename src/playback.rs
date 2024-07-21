@@ -1,7 +1,7 @@
 use std::{collections::VecDeque, fs::File};
 
 use rodio::{OutputStream, Sink};
-use tokio::sync::mpsc::Receiver;
+use std::sync::mpsc::Receiver;
 
 pub enum PlaybackEvent {
     Playlist(Vec<String>),
@@ -10,7 +10,7 @@ pub enum PlaybackEvent {
     Backward,
 }
 
-pub fn start_playing(mut rx: Receiver<PlaybackEvent>) {
+pub fn start_playing(rx: Receiver<PlaybackEvent>) {
     tokio::task::spawn_blocking(move || {
         let (_stream, stram_handle) =
             OutputStream::try_default().expect("ERROR: error getting OutputStream");
@@ -18,25 +18,28 @@ pub fn start_playing(mut rx: Receiver<PlaybackEvent>) {
 
         let mut playlist = VecDeque::new();
 
-        while let Some(evt) = rx.blocking_recv() {
-            match evt {
-                PlaybackEvent::Playlist(list) => {
-                    if !playlist.is_empty() {
-                        sink.clear();
+        loop {
+            if let Ok(evt) = rx.try_recv() {
+                match evt {
+                    PlaybackEvent::Playlist(list) => {
+                        if !playlist.is_empty() {
+                            sink.clear();
+                        }
+                        for li in list {
+                            playlist.push_back(li);
+                        }
                     }
-                    for li in list {
-                        playlist.push_back(li);
+                    PlaybackEvent::PauseToggle => {
+                        if sink.is_paused() {
+                            sink.play();
+                        } else {
+                            sink.pause();
+                        }
                     }
+                    _ => {}
                 }
-                PlaybackEvent::PauseToggle => {
-                    if sink.is_paused() {
-                        sink.play();
-                    } else {
-                        sink.pause();
-                    }
-                }
-                _ => {}
             }
+
             if sink.empty() {
                 if let Some(music_file) = playlist.pop_front() {
                     let file =
