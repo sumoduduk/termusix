@@ -56,11 +56,11 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<
         }
 
         KeyCode::PageUp => {
-            app.next_music();
+            app.prev_music();
         }
 
         KeyCode::PageDown => {
-            app.prev_music();
+            app.next_music();
         }
         // Other handlers you could add here.
         _ => {}
