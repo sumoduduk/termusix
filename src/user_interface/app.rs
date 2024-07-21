@@ -1,6 +1,3 @@
-use std::path;
-
-use music_list::MusicList;
 use ratatui::{
     buffer::Buffer,
     layout::Rect,
@@ -8,7 +5,7 @@ use ratatui::{
     widgets::{ListState, Widget},
 };
 use screen::{get_border_color, Screen};
-use tokio::sync::mpsc::Sender;
+use std::sync::mpsc::Sender;
 
 use crate::{playback::PlaybackEvent, playlist::Playlist};
 
@@ -85,7 +82,7 @@ impl App {
         }
     }
 
-    pub async fn play_music(&self) {
+    pub fn play_music(&self) {
         let idx = self.tabs_playlist.selected().unwrap_or(0);
 
         if let Some(playlist) = self.playlist.list_music_by_idx(Some(idx)) {
@@ -94,8 +91,12 @@ impl App {
                 .map(|id| ["music/", id, ".mp3"].concat())
                 .collect();
 
-            let _ = self.tx_playback.send(PlaybackEvent::Playlist(data)).await;
+            let _ = self.tx_playback.send(PlaybackEvent::Playlist(data));
         }
+    }
+
+    pub fn pause_toggle(&self) {
+        let _ = self.tx_playback.send(PlaybackEvent::PauseToggle);
     }
 }
 
