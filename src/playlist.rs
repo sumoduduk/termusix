@@ -70,32 +70,15 @@ impl Playlist {
         titles
     }
 
-    pub fn list_shuffled_music(&self, indx: Option<usize>) -> Vec<String> {
-        if let Some(indx) = indx {
-            if let Some(info_playlist) = self.0.get_index(indx) {
-                let music_list = &info_playlist.1.music_list;
-                let mut music_list: Vec<String> =
-                    music_list.values().map(|s| s.to_owned()).collect();
+    pub fn list_music_by_idx(&mut self, indx: Option<usize>) -> Option<MusicInfo> {
+        let Some(indx) = indx else { return None };
+        let Some(info_playlist) = self.0.get_index(indx) else {
+            return None;
+        };
 
-                shuffle_vec(&mut music_list);
-                music_list
-            } else {
-                Vec::new()
-            }
-        } else {
-            Vec::new()
-        }
+        let music = &info_playlist.1.music_list;
+        Some(music.clone())
     }
-
-    // pub fn list_music(&self, id: &str) -> Option<&MusicInfo> {
-    //     let music_playlist = &self.0;
-    //
-    //     if let Some(info_playlist) = music_playlist.ge(id) {
-    //         Some(&info_playlist.music_list)
-    //     } else {
-    //         None
-    //     }
-    // }
 
     pub fn list_shuffled_music_id(&self, id: &str) -> eyre::Result<Vec<String>> {
         let music_playlist = &self.0;
