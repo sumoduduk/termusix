@@ -46,11 +46,14 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<
 
         KeyCode::Char('p') => match app.screen_state {
             Screen::Playlist => {
-                app.play_music().await;
+                app.play_music();
             }
             _ => {}
         },
 
+        KeyCode::Char(' ') => {
+            app.pause_toggle();
+        }
         // Other handlers you could add here.
         _ => {}
     }
