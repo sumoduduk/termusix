@@ -36,11 +36,9 @@ pub fn render(app: &mut App, area: Rect, buf: &mut Buffer) {
         .border_style(app.get_border_color(ListMusic));
 
     let indx = app.tabs_playlist.selected();
-    app.list_playlist_music(indx);
+    let music = app.list_playlist_music(indx).unwrap_or_default();
 
-    let musics = app.music_list.get_list().clone();
-
-    let music_list = List::new(musics)
+    let music_list = List::new(music)
         .block(music_block)
         .highlight_style(SELECTED_STYLE)
         .highlight_symbol(">")
@@ -49,12 +47,7 @@ pub fn render(app: &mut App, area: Rect, buf: &mut Buffer) {
     playback_block.render(playback_layout, buf);
     // playlist_block.render(playlist_layout, buf);
 
-    StatefulWidget::render(
-        music_list,
-        music_list_layout,
-        buf,
-        &mut app.music_list.list_state,
-    );
+    StatefulWidget::render(music_list, music_list_layout, buf, &mut app.music_list);
 
     render_tab(app, playlist_layout, buf, playlist_block);
 
