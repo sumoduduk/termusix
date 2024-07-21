@@ -3,7 +3,7 @@ use std::time::Duration;
 use crossterm::event::{Event as CrosstermEvent, KeyEvent, MouseEvent};
 use eyre::OptionExt;
 use futures::{FutureExt, StreamExt};
-use tokio::sync::mpsc;
+use tokio::sync::broadcast::{self, error::TryRecvError};
 
 use crate::app::AppResult;
 
@@ -25,9 +25,9 @@ pub enum Event {
 #[derive(Debug)]
 pub struct EventHandler {
     /// Event sender channel.
-    sender: mpsc::UnboundedSender<Event>,
+    sender: broadcast::Sender<Event>,
     /// Event receiver channel.
-    receiver: mpsc::UnboundedReceiver<Event>,
+    receiver: broadcast::Receiver<Event>,
     /// Event handler thread.
     handler: tokio::task::JoinHandle<()>,
 }
@@ -36,7 +36,7 @@ impl EventHandler {
     /// Constructs a new instance of [`EventHandler`].
     pub fn new(tick_rate: u64) -> Self {
         let tick_rate = Duration::from_millis(tick_rate);
-        let (sender, receiver) = mpsc::unbounded_channel();
+        let (sender, receiver) = broadcast::channel(100);
         let _sender = sender.clone();
         let handler = tokio::spawn(async move {
             let mut reader = crossterm::event::EventStream::new();
@@ -44,10 +44,15 @@ impl EventHandler {
             loop {
                 let tick_delay = tick.tick();
                 let crossterm_event = reader.next().fuse();
+                if let Err(err) = _sender.clone().subscribe().try_recv() {
+                    if let TryRecvError::Closed = err {
+                        break;
+                    }
+                };
                 tokio::select! {
-                  _ = _sender.closed() => {
-                    break;
-                  }
+                  // _ = _ => {
+                  //   break;
+                  // }
                   _ = tick_delay => {
                     _sender.send(Event::Tick).unwrap();
                   }
