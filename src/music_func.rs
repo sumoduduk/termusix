@@ -1,13 +1,11 @@
-mod download;
 mod music_util;
 
-use download::download_music;
 use music_util::get_path;
 use rodio::{OutputStream, Sink};
 use std::{collections::VecDeque, fs::File, thread};
 use tokio::sync::mpsc;
 
-use crate::file_ops::check_file_exist;
+use crate::{download::download_music, file_ops::check_file_exist};
 
 pub async fn play(music_paths: Vec<String>) -> eyre::Result<()> {
     let mut handles = Vec::with_capacity(2);
