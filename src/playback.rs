@@ -6,6 +6,7 @@ use std::sync::mpsc::Receiver;
 pub enum PlaybackEvent {
     Playlist(Vec<String>),
     PauseToggle,
+    Add(String),
     Forward,
     Backward,
     Quit,
@@ -34,6 +35,9 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>) {
                             sink.pause();
                         }
                     }
+                    PlaybackEvent::Add(id) => {
+                        playlist.push_back(id);
+                    }
                     PlaybackEvent::Quit => {
                         sink.clear();
                         is_played = false;
@@ -59,19 +63,18 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>) {
 
             if sink.empty() {
                 if let Some(music_file) = playlist.pop_front() {
-                    let file =
-                        File::open(&music_file).expect("ERROR: can't open a file in {music_file}");
-
-                    match rodio::Decoder::new(file) {
-                        Ok(source) => {
-                            sink.append(source);
-                            sink.play();
+                    if let Ok(file) = File::open(&music_file) {
+                        match rodio::Decoder::new(file) {
+                            Ok(source) => {
+                                sink.append(source);
+                                sink.play();
+                            }
+                            Err(err) => {
+                                eprintln!("ERROR: can't add {} into playlist {err}", &music_file)
+                            }
                         }
-                        Err(err) => {
-                            eprintln!("ERROR: can't add {} into playlist {err}", &music_file)
-                        }
+                        playlist.push_back(music_file);
                     }
-                    playlist.push_back(music_file);
                 }
             }
             std::thread::sleep(std::time::Duration::from_millis(900));
