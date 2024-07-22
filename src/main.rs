@@ -1,3 +1,4 @@
+mod download;
 mod file_ops;
 mod music_func;
 mod playback;
