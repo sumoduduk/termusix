@@ -36,7 +36,7 @@ pub fn render(app: &mut App, area: Rect, buf: &mut Buffer) {
         .border_style(app.get_border_color(ListMusic));
 
     let indx = app.tabs_playlist.selected();
-    let music = app.list_playlist_music(indx).unwrap_or_default();
+    let music = app.list_downloaded_first(indx);
 
     let music_list = List::new(music)
         .block(music_block)
