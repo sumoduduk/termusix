@@ -28,5 +28,5 @@ pub async fn play_and_download(app: &App) {
 }
 
 fn concat_file(id: &str) -> String {
-    ["music", id, ".mp3"].concat()
+    ["music/", id, ".mp3"].concat()
 }
