@@ -7,7 +7,7 @@ use ratatui::{
 use screen::{get_border_color, Screen};
 use std::sync::mpsc::Sender;
 
-use crate::{playback::PlaybackEvent, playlist::Playlist};
+use crate::{file_ops::check_file_exist_sync, playback::PlaybackEvent, playlist::Playlist};
 
 mod music_list;
 pub mod screen;
@@ -81,6 +81,29 @@ impl App {
         } else {
             None
         }
+    }
+
+    pub fn list_downloaded_first(&self, indx: Option<usize>) -> Vec<String> {
+        let Some(mut list_music) = self.playlist.list_music_by_idx(indx) else {
+            return vec![];
+        };
+
+        let mut i = 0;
+        for (id, _) in list_music.clone().iter() {
+            let file_name = ["music/", id, ".mp3"].concat();
+            if check_file_exist_sync(&file_name).is_some() {
+                if let Some(index) = list_music.get_index_of(id) {
+                    list_music.swap_indices(index, i);
+                    i += 1;
+                }
+            }
+        }
+        let res: Vec<String> = list_music
+            .clone()
+            .values()
+            .map(|name| name.to_owned())
+            .collect();
+        res
     }
 
     pub fn play_music(&self) {
