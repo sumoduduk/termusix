@@ -71,10 +71,8 @@ impl Playlist {
     }
 
     pub fn list_music_by_idx(&self, indx: Option<usize>) -> Option<MusicInfo> {
-        let Some(indx) = indx else { return None };
-        let Some(info_playlist) = self.0.get_index(indx) else {
-            return None;
-        };
+        let indx = indx?;
+        let info_playlist = self.0.get_index(indx)?;
 
         let music = &info_playlist.1.music_list;
         Some(music.clone())
