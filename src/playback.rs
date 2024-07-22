@@ -39,6 +39,7 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>) {
                         playlist.push_back(id);
                     }
                     PlaybackEvent::Quit => {
+                        playlist = VecDeque::with_capacity(1);
                         sink.clear();
                         is_played = false;
                     }
