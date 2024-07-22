@@ -6,7 +6,6 @@ use std::{path::Path, process::Output};
 
 pub async fn download_music(id: &str) -> eyre::Result<Output> {
     let path_file = ["music/", id, ".webm"].concat();
-    println!("begin download music to : {}", path_file);
 
     let opt = VideoOptions {
         quality: VideoQuality::HighestAudio,
