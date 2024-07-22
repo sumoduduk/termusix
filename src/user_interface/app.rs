@@ -7,11 +7,9 @@ use ratatui::{
 use screen::{get_border_color, Screen};
 use std::sync::mpsc::Sender;
 
-use crate::{file_ops::check_file_exist_sync, playback::PlaybackEvent, playlist::Playlist};
+use crate::{playback::PlaybackEvent, playlist::Playlist};
 
-mod music_list;
 pub mod screen;
-mod tabs_playlist;
 mod ui;
 // use std::error;
 
@@ -84,26 +82,19 @@ impl App {
     }
 
     pub fn list_downloaded_first(&self, indx: Option<usize>) -> Vec<String> {
-        let Some(mut list_music) = self.playlist.list_music_by_idx(indx) else {
+        let Some((list_music, _)) = self.playlist.list_music_sorted(indx) else {
             return vec![];
         };
 
-        let mut i = 0;
-        for (id, _) in list_music.clone().iter() {
-            let file_name = ["music/", id, ".mp3"].concat();
-            if check_file_exist_sync(&file_name).is_some() {
-                if let Some(index) = list_music.get_index_of(id) {
-                    list_music.swap_indices(index, i);
-                    i += 1;
-                }
-            }
-        }
-        let res: Vec<String> = list_music
-            .clone()
-            .values()
-            .map(|name| name.to_owned())
-            .collect();
+        let res: Vec<String> = list_music.values().map(|name| name.to_owned()).collect();
         res
+    }
+
+    pub fn list_id_downloaded_first(&self, indx: Option<usize>) -> Option<(Vec<String>, usize)> {
+        let (list_music, i) = self.playlist.list_music_sorted(indx)?;
+
+        let res: Vec<String> = list_music.keys().map(|name| name.to_owned()).collect();
+        Some((res, i))
     }
 
     pub fn play_music(&self) {
