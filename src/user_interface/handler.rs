@@ -1,10 +1,6 @@
 mod play;
 
-use crate::{
-    app::{App, AppResult},
-    download::download_music,
-    playback::PlaybackEvent,
-};
+use crate::app::{App, AppResult};
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use play::play_and_download;
 
