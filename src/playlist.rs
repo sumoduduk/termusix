@@ -6,7 +6,7 @@ use save_playlist::{get_playlist, save_file_json, save_id};
 use serde::{Deserialize, Serialize};
 use std::fs;
 
-use crate::utils::shuffle_vec;
+use crate::{file_ops::check_file_exist_sync, utils::shuffle_vec};
 
 // #[derive(Serialize, Deserialize, Debug, PartialEq)]
 // struct MusicInfo {
@@ -76,6 +76,23 @@ impl Playlist {
 
         let music = &info_playlist.1.music_list;
         Some(music.clone())
+    }
+
+    pub fn list_music_sorted(&self, indx: Option<usize>) -> Option<(MusicInfo, usize)> {
+        let mut list_music = self.list_music_by_idx(indx)?;
+
+        let mut i = 0;
+        for (id, _) in list_music.clone().iter() {
+            let file_name = ["music/", id, ".mp3"].concat();
+            if check_file_exist_sync(&file_name).is_some() {
+                if let Some(index) = list_music.get_index_of(id) {
+                    list_music.swap_indices(index, i);
+                    i += 1;
+                }
+            }
+        }
+
+        Some((list_music, i))
     }
 
     pub fn list_shuffled_music_id(&self, id: &str) -> eyre::Result<Vec<String>> {
