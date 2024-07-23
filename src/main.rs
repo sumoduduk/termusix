@@ -14,9 +14,12 @@ use ratatui::{backend::CrosstermBackend, Terminal};
 use serde::{Deserialize, Serialize};
 use std::env::args;
 use std::io;
+use std::sync::{Arc, RwLock};
 
 use user_interface::event::Event;
 use user_interface::*;
+
+type NowPlaying = Arc<RwLock<Option<String>>>;
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -79,15 +82,17 @@ async fn main() -> eyre::Result<()> {
             // Create an application.
 
             let (tx, rx) = std::sync::mpsc::channel();
+            let now_playing: NowPlaying = Arc::new(RwLock::new(None::<String>));
+            let now_playing_app = Arc::clone(&now_playing);
 
-            let mut app = app::App::new(tx);
+            let mut app = app::App::new(tx, now_playing_app);
             // Initialize the terminal user interface.
             let backend = CrosstermBackend::new(io::stderr());
             let terminal = Terminal::new(backend)?;
             let events = event::EventHandler::new(250);
             let mut tui = tui::Tui::new(terminal, events);
             tui.init()?;
-            start_playing(rx);
+            start_playing(rx, now_playing);
 
             // Start the main loop.
             while app.running {
