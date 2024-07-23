@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use crate::{app::App, download::download_music, playback::PlaybackEvent};
 use tokio::time::{self, Duration};
 
@@ -6,7 +8,7 @@ pub async fn play_and_download(app: &App) {
     let send = app.tx_playback.clone();
     if let Some((list, len)) = app.list_id_downloaded_first(indx) {
         tokio::spawn(async move {
-            let downloaded: Vec<String> = list[..len]
+            let downloaded: VecDeque<String> = list[..len]
                 .to_vec()
                 .iter()
                 .map(|id| concat_file(id))
