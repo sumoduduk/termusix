@@ -7,7 +7,7 @@ use ratatui::{
 use screen::{get_border_color, Screen};
 use std::sync::mpsc::Sender;
 
-use crate::{playback::PlaybackEvent, playlist::Playlist};
+use crate::{playback::PlaybackEvent, playlist::Playlist, NowPlaying};
 
 pub mod screen;
 mod ui;
@@ -27,6 +27,7 @@ pub struct App {
     pub playlist: Playlist,
     pub tabs_playlist: ListState,
     pub tx_playback: Sender<PlaybackEvent>,
+    pub now_playing: NowPlaying,
 }
 
 // impl Default for App {
@@ -35,7 +36,7 @@ pub struct App {
 
 impl App {
     /// Constructs a new instance of [`App`].
-    pub fn new(tx: Sender<PlaybackEvent>) -> Self {
+    pub fn new(tx: Sender<PlaybackEvent>, now_playing: NowPlaying) -> Self {
         let playlist = Playlist::new().expect("ERROR: No playlist found");
 
         Self {
@@ -45,6 +46,7 @@ impl App {
             playlist,
             tabs_playlist: ListState::default(),
             tx_playback: tx,
+            now_playing,
         }
     }
 
@@ -97,18 +99,18 @@ impl App {
         Some((res, i))
     }
 
-    pub fn play_music(&self) {
-        let idx = self.tabs_playlist.selected().unwrap_or(0);
-
-        if let Some(playlist) = self.playlist.list_music_by_idx(Some(idx)) {
-            let data: Vec<String> = playlist
-                .keys()
-                .map(|id| ["music/", id, ".mp3"].concat())
-                .collect();
-
-            let _ = self.tx_playback.send(PlaybackEvent::Playlist(data));
-        }
-    }
+    // pub fn play_music(&self) {
+    //     let idx = self.tabs_playlist.selected().unwrap_or(0);
+    //
+    //     if let Some(playlist) = self.playlist.list_music_by_idx(Some(idx)) {
+    //         let data: Vec<String> = playlist
+    //             .keys()
+    //             .map(|id| ["music/", id, ".mp3"].concat())
+    //             .collect();
+    //
+    //         let _ = self.tx_playback.send(PlaybackEvent::Playlist(data));
+    //     }
+    // }
 
     pub fn pause_toggle(&self) {
         let _ = self.tx_playback.send(PlaybackEvent::PauseToggle);
@@ -120,6 +122,20 @@ impl App {
 
     pub fn prev_music(&self) {
         let _ = self.tx_playback.send(PlaybackEvent::Backward);
+    }
+
+    pub fn get_now_playing(&self) -> Option<String> {
+        let id = if let Ok(ids) = self.now_playing.read() {
+            let name_id = ids.as_ref()?;
+
+            let selected = self.tabs_playlist.selected();
+            let list = self.playlist.list_music_sorted(selected)?;
+            let name_song = list.0.get_key_value(name_id)?;
+            Some(name_song.1.to_owned())
+        } else {
+            None
+        };
+        id
     }
 }
 
