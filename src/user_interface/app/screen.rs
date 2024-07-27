@@ -12,6 +12,7 @@ pub enum Screen {
     Playlist,
     #[default]
     ListMusic,
+    InsertPlaylist,
 }
 
 pub fn get_border_color(app_screen: &Screen, screen: Screen) -> Style {
