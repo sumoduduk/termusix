@@ -1,7 +1,9 @@
+mod handle_up_down;
 mod play;
 
 use crate::app::{App, AppResult};
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use handle_up_down::{handle_key_down, handle_key_up};
 use play::play_and_download;
 
 use super::app::screen::Screen;
@@ -23,25 +25,11 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<
             app.next_screen();
         }
 
-        KeyCode::Char('j') => match app.screen_state {
-            Screen::Playlist => {
-                app.tabs_playlist.select_next();
-            }
-            Screen::ListMusic => {
-                app.music_list.select_next();
-            }
+        KeyCode::Up => handle_key_up(app),
+        KeyCode::Down => handle_key_down(app),
+        KeyCode::Char('k') => handle_key_up(app),
+        KeyCode::Char('j') => handle_key_down(app),
 
-            _ => {}
-        },
-        KeyCode::Char('k') => match app.screen_state {
-            Screen::Playlist => {
-                app.tabs_playlist.select_previous();
-            }
-            Screen::ListMusic => {
-                app.music_list.select_previous();
-            }
-            _ => {}
-        },
         #[allow(clippy::single_match)]
         KeyCode::Char('p') => match app.screen_state {
             Screen::Playlist => {
@@ -61,26 +49,7 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<
         KeyCode::PageDown => {
             app.next_music();
         }
-        KeyCode::Up => match app.screen_state {
-            Screen::Playlist => {
-                app.tabs_playlist.select_previous();
-            }
-            Screen::ListMusic => {
-                app.music_list.select_previous();
-            }
-            _ => {}
-        },
 
-        KeyCode::Down => match app.screen_state {
-            Screen::Playlist => {
-                app.tabs_playlist.select_next();
-            }
-            Screen::ListMusic => {
-                app.music_list.select_next();
-            }
-
-            _ => {}
-        },
         //add another
         _ => {}
     }
