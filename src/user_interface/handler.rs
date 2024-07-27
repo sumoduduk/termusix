@@ -1,12 +1,14 @@
+mod handle_enter;
 mod handle_up_down;
 mod play;
 
 use crate::app::{App, AppResult};
-use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
 use handle_up_down::{handle_key_down, handle_key_up};
 use play::play_and_download;
 
 use super::app::screen::Screen;
+use tui_input::backend::crossterm::EventHandler;
 
 /// Handles the key events and updates the state of [`App`].
 pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
@@ -61,7 +63,14 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<
         }
 
         //add another
-        _ => {}
+        #[allow(clippy::single_match)]
+        _ => match app.screen_state {
+            Screen::InsertPlaylist => {
+                app.input_playlist.handle_event(&Event::Key(key_event));
+            }
+
+            _ => {}
+        },
     }
     Ok(())
 }
