@@ -13,15 +13,17 @@ use ratatui::{
     buffer::Buffer,
     layout::{Constraint, Layout, Rect},
     style::{palette::tailwind::SLATE, Modifier, Style},
-    widgets::{Block, Clear, Widget},
+    widgets::{Block, Clear, Paragraph, Widget},
 };
+
+use crate::user_interface::cursor::Cursor;
 
 use super::{screen::Screen, App};
 use Constraint::*;
 
 const SELECTED_STYLE: Style = Style::new().bg(SLATE.c800).add_modifier(Modifier::BOLD);
 
-pub fn render(app: &mut App, area: Rect, buf: &mut Buffer) {
+pub fn render(app: &mut App, area: Rect, buf: &mut Buffer, cursor: &mut Cursor) {
     let main_screen = Layout::vertical([Percentage(100), Min(3)]);
     let [main_layout, footer_layout] = main_screen.areas(area);
 
@@ -39,12 +41,25 @@ pub fn render(app: &mut App, area: Rect, buf: &mut Buffer) {
     #[allow(clippy::single_match)]
     match app.screen_state {
         Screen::InsertPlaylist => {
-            let pop_up_area = centered_rect(60, 20, area);
+            let pop_up_area = centered_rect(60, 10, area);
 
             Clear.render(pop_up_area, buf);
-            Block::bordered()
-                .title("Insert Playlist")
+            let block = Block::bordered().title("Insert Playlist");
+
+            let width = pop_up_area.width.max(3) - 3;
+            let scroll = app.input_playlist.visual_scroll(width as usize);
+
+            Paragraph::new(app.input_playlist.value())
+                .scroll((0, scroll as u16))
+                .block(block)
                 .render(pop_up_area, buf);
+
+            cursor.set(
+                pop_up_area.x
+                    + ((app.input_playlist.visual_cursor()).max(scroll) - scroll) as u16
+                    + 1,
+                pop_up_area.y + 1,
+            )
         }
         _ => {}
     }
