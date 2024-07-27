@@ -6,6 +6,7 @@ mod user_interface;
 mod utils;
 
 use handler::handle_key_events;
+use playback::start_playing;
 use ratatui::{backend::CrosstermBackend, Terminal};
 use serde::{Deserialize, Serialize};
 use std::io;
