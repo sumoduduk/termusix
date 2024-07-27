@@ -12,9 +12,15 @@ use super::app::screen::Screen;
 pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
     match key_event.code {
         // Exit application on `ESC` or `q`
-        KeyCode::Esc | KeyCode::Char('q') => {
+        KeyCode::Char('q') => {
             app.quit();
         }
+
+        #[allow(clippy::single_match)]
+        KeyCode::Esc => match app.screen_state {
+            Screen::InsertPlaylist => app.screen_state = Screen::ListMusic,
+            _ => app.quit(),
+        },
         // Exit application on `Ctrl-C`
         KeyCode::Char('c') | KeyCode::Char('C') => {
             if key_event.modifiers == KeyModifiers::CONTROL {
@@ -48,6 +54,10 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<
 
         KeyCode::PageDown => {
             app.next_music();
+        }
+
+        KeyCode::Char('a') => {
+            app.screen_state = Screen::InsertPlaylist;
         }
 
         //add another
