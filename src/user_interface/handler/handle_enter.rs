@@ -1,5 +1,13 @@
-use crate::app::App;
+use crate::app::{screen::Screen, App};
 
 pub fn enter_key(app: &mut App) {
-    todo!()
+    match app.screen_state {
+        Screen::InsertPlaylist => {
+            app.input_playlist.reset();
+        }
+        Screen::Playlist => {
+            app.screen_state = Screen::ListMusic;
+        }
+        _ => {}
+    }
 }
