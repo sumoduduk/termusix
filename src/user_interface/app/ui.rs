@@ -8,17 +8,16 @@ use footer_components::render_footer;
 use music_list_components::render_music_list;
 use playback_component::render_playback;
 use playlist_components::render_playlist;
-use pop_up::centered_rect;
+use pop_up::render_popup;
 use ratatui::{
     buffer::Buffer,
     layout::{Constraint, Layout, Rect},
     style::{palette::tailwind::SLATE, Modifier, Style},
-    widgets::{Block, Clear, Paragraph, Widget},
 };
 
 use crate::user_interface::cursor::Cursor;
 
-use super::{screen::Screen, App};
+use super::App;
 use Constraint::*;
 
 const SELECTED_STYLE: Style = Style::new().bg(SLATE.c800).add_modifier(Modifier::BOLD);
@@ -37,29 +36,5 @@ pub fn render(app: &mut App, area: Rect, buf: &mut Buffer, cursor: &mut Cursor) 
     render_playlist(app, playlist_layout, buf);
     render_music_list(app, music_list_layout, buf);
     render_footer(app, footer_layout, buf);
-
-    match app.screen_state {
-        Screen::InsertPlaylist => {
-            let pop_up_area = centered_rect(60, 10, area);
-
-            Clear.render(pop_up_area, buf);
-            let block = Block::bordered().title("Insert Playlist");
-
-            let width = pop_up_area.width.max(3) - 3;
-            let scroll = app.input_playlist.visual_scroll(width as usize);
-
-            Paragraph::new(app.input_playlist.value())
-                .scroll((0, scroll as u16))
-                .block(block)
-                .render(pop_up_area, buf);
-
-            cursor.set(
-                pop_up_area.x
-                    + ((app.input_playlist.visual_cursor()).max(scroll) - scroll) as u16
-                    + 1,
-                pop_up_area.y + 1,
-            )
-        }
-        _ => {}
-    }
+    render_popup(app, area, buf, cursor);
 }
