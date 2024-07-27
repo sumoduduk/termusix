@@ -2,12 +2,15 @@ use ratatui::{
     buffer::Buffer,
     layout::Rect,
     style::Style,
-    widgets::{ListState, Widget},
+    widgets::{ListState, StatefulWidget},
 };
 use screen::{get_border_color, Screen};
 use std::sync::mpsc::Sender;
+use tui_input::Input;
 
 use crate::{playback::PlaybackEvent, playlist::Playlist, NowPlaying};
+
+use super::cursor::Cursor;
 
 pub mod screen;
 mod ui;
@@ -28,6 +31,7 @@ pub struct App {
     pub tabs_playlist: ListState,
     pub tx_playback: Sender<PlaybackEvent>,
     pub now_playing: NowPlaying,
+    pub input_playlist: Input,
 }
 
 // impl Default for App {
@@ -47,6 +51,7 @@ impl App {
             tabs_playlist: ListState::default(),
             tx_playback: tx,
             now_playing,
+            input_playlist: Input::default(),
         }
     }
 
@@ -140,8 +145,9 @@ impl App {
     }
 }
 
-impl Widget for &mut App {
-    fn render(self, area: Rect, buf: &mut Buffer) {
-        ui::render(self, area, buf);
+impl StatefulWidget for &mut App {
+    type State = Cursor;
+    fn render(self, area: Rect, buf: &mut Buffer, state: &mut Self::State) {
+        ui::render(self, area, buf, state);
     }
 }
