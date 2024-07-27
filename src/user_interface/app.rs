@@ -66,6 +66,7 @@ impl App {
             Playback => self.screen_state = Playlist,
             Playlist => self.screen_state = ListMusic,
             ListMusic => self.screen_state = Playback,
+            _ => {}
         };
     }
 
