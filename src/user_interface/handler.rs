@@ -19,10 +19,6 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<
                 app.quit();
             }
         }
-        // Counter handlers
-        // KeyCode::Right => {
-        //     app.increment_counter();
-        // }
         KeyCode::Tab => {
             app.next_screen();
         }
@@ -65,7 +61,27 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<
         KeyCode::PageDown => {
             app.next_music();
         }
-        // Other handlers you could add here.
+        KeyCode::Up => match app.screen_state {
+            Screen::Playlist => {
+                app.tabs_playlist.select_previous();
+            }
+            Screen::ListMusic => {
+                app.music_list.select_previous();
+            }
+            _ => {}
+        },
+
+        KeyCode::Down => match app.screen_state {
+            Screen::Playlist => {
+                app.tabs_playlist.select_next();
+            }
+            Screen::ListMusic => {
+                app.music_list.select_next();
+            }
+
+            _ => {}
+        },
+        //add another
         _ => {}
     }
     Ok(())
