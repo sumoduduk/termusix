@@ -38,7 +38,6 @@ pub fn render(app: &mut App, area: Rect, buf: &mut Buffer, cursor: &mut Cursor) 
     render_music_list(app, music_list_layout, buf);
     render_footer(app, footer_layout, buf);
 
-    #[allow(clippy::single_match)]
     match app.screen_state {
         Screen::InsertPlaylist => {
             let pop_up_area = centered_rect(60, 10, area);
