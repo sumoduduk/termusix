@@ -2762,6 +2762,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tokio",
+ "tui-input",
 ]
 
 [[package]]
@@ -2981,6 +2982,16 @@ name = "try-lock"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
+
+[[package]]
+name = "tui-input"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9b02e86628a225c39b2602863f244a01668184149928ceb410e47a8022d7597e"
+dependencies = [
+ "crossterm",
+ "unicode-width",
+]
 
 [[package]]
 name = "typenum"
