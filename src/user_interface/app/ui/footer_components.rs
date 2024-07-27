@@ -16,6 +16,7 @@ pub fn render_footer(app: &App, footer_layout: Rect, buf: &mut Buffer) {
         Screen::ListMusic => {
             "Press TAB to switch to Now Playing | ⬆️ or ⬇️ to scroll song | ENTER to play "
         }
+        _ => "",
     };
 
     let block = Block::new()
