@@ -1,7 +1,11 @@
+mod delete_playlist;
+mod save_local;
 mod save_playlist;
 
+use delete_playlist::{remove_playlist, remove_song};
 use eyre::OptionExt;
 use indexmap::IndexMap;
+use save_local::save_local;
 use save_playlist::{get_playlist, save_file_json, save_id};
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -44,10 +48,29 @@ impl Playlist {
         Ok(())
     }
 
+    pub fn save_local_playlist(&mut self, id: &str) -> eyre::Result<()> {
+        save_local(self, id);
+
+        save_file_json(&self.0)?;
+        Ok(())
+    }
+
     pub async fn save_by_id(&mut self, id: &str) -> eyre::Result<()> {
         save_id(self, id).await?;
         save_file_json(&self.0)?;
         Ok(())
+    }
+
+    pub fn delete_playlist(&mut self, index_id: usize) {
+        if remove_playlist(self, index_id).is_some() {
+            let _ = save_file_json(&self.0);
+        }
+    }
+
+    pub fn delete_song(&mut self, index_id: usize, index_song: usize) {
+        if remove_song(self, index_id, index_song).is_some() {
+            let _ = save_file_json(&self.0);
+        }
     }
 
     pub fn list_playlist(&self) {
