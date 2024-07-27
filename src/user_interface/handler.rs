@@ -4,6 +4,7 @@ mod play;
 
 use crate::app::{App, AppResult};
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
+use handle_enter::enter_key;
 use handle_up_down::{handle_key_down, handle_key_up};
 use play::play_and_download;
 
@@ -18,7 +19,6 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<
             app.quit();
         }
 
-        #[allow(clippy::single_match)]
         KeyCode::Esc => match app.screen_state {
             Screen::InsertPlaylist => app.screen_state = Screen::ListMusic,
             _ => app.quit(),
@@ -37,8 +37,7 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<
         KeyCode::Down => handle_key_down(app),
         KeyCode::Char('k') => handle_key_up(app),
         KeyCode::Char('j') => handle_key_down(app),
-
-        #[allow(clippy::single_match)]
+        KeyCode::Enter => enter_key(app),
         KeyCode::Char('p') => match app.screen_state {
             Screen::Playlist => {
                 play_and_download(app).await;
@@ -63,7 +62,6 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<
         }
 
         //add another
-        #[allow(clippy::single_match)]
         _ => match app.screen_state {
             Screen::InsertPlaylist => {
                 app.input_playlist.handle_event(&Event::Key(key_event));
