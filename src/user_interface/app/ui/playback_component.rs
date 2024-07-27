@@ -7,18 +7,15 @@ use ratatui::{
 
 use crate::app::{App, Screen};
 
-pub fn render_playback(
-    app: &App,
-    playback_layout: Rect,
-    buf: &mut Buffer,
-    song_name: Option<String>,
-) {
+pub fn render_playback(app: &App, playback_layout: Rect, buf: &mut Buffer) {
     let playback_block = Block::new()
         .title("Now Playing")
         .borders(Borders::ALL)
         .padding(Padding::new(0, 0, playback_layout.height / 4, 0))
         .border_type(BorderType::Rounded)
         .border_style(app.get_border_color(Screen::Playback));
+
+    let song_name = app.get_now_playing();
 
     display_now_playing(song_name, playback_block, playback_layout, buf)
 }
