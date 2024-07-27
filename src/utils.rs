@@ -5,10 +5,7 @@ use rand::XorShiftRng;
 mod rand;
 
 pub fn shuffle_vec<T>(arr: &mut [T]) {
-    let seed = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .expect("Clockwork may gone backward")
-        .as_secs();
+    let seed = time_now();
 
     let len = arr.len();
     let mut rng = XorShiftRng::new(seed);
@@ -17,6 +14,13 @@ pub fn shuffle_vec<T>(arr: &mut [T]) {
         let j = rng.gen_range(0..=i.try_into().expect("Cant convert element of array!"));
         arr.swap(i, j.try_into().expect("Cant convert element of array!"));
     }
+}
+
+pub fn time_now() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("Clockwork may gone backward")
+        .as_secs()
 }
 
 #[cfg(test)]
