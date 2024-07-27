@@ -1,4 +1,22 @@
-use ratatui::layout::{Constraint, Layout, Rect};
+mod pop_up_plylist;
+
+use pop_up_plylist::render_popup_playlist;
+use ratatui::{
+    buffer::Buffer,
+    layout::{Constraint, Layout, Rect},
+};
+
+use crate::{
+    app::{screen::Screen, App},
+    user_interface::cursor::Cursor,
+};
+
+pub fn render_popup(app: &App, area: Rect, buf: &mut Buffer, cursor: &mut Cursor) {
+    match app.screen_state {
+        Screen::InsertPlaylist => render_popup_playlist(app, area, buf, cursor),
+        _ => {}
+    }
+}
 
 pub fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
     let popup_layout = Layout::vertical([
