@@ -1,3 +1,5 @@
+mod add_music_widget;
+mod list_folder_add;
 mod pop_up_plylist;
 
 use pop_up_plylist::render_popup_playlist;
