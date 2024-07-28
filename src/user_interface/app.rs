@@ -12,6 +12,7 @@ use crate::{playback::PlaybackEvent, playlist::Playlist, NowPlaying};
 
 use super::cursor::Cursor;
 
+mod app_state;
 pub mod screen;
 mod ui;
 // use std::error;
