@@ -1,4 +1,7 @@
-use crate::app::{screen::Screen, App};
+use crate::app::{
+    screen::{AddSongPopup, Screen},
+    App,
+};
 
 pub fn handle_a(app: &mut App) {
     match app.screen_state {
@@ -6,7 +9,7 @@ pub fn handle_a(app: &mut App) {
             app.screen_state = Screen::InsertPlaylist;
         }
         Screen::ListMusic => {
-            app.screen_state = Screen::InsertSong;
+            app.screen_state = Screen::AddSongPopup(AddSongPopup::default());
         }
         _ => {}
     }
