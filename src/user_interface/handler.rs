@@ -4,6 +4,7 @@ mod handle_up_down;
 pub mod input_playlist_handler;
 mod insert_playlist_song;
 mod play;
+mod pop_song_hanlde;
 
 use crate::app::{App, AppResult};
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
