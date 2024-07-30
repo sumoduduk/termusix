@@ -42,6 +42,44 @@ impl FileExplorer {
         Renderer(self)
     }
 
+    pub fn scroll_up(&mut self) {
+        if self.selected == 0 {
+            self.selected = self.files.len() - 1;
+        } else {
+            self.selected -= 1;
+        }
+    }
+
+    pub fn scroll_down(&mut self) {
+        if self.selected == self.files.len() - 1 {
+            self.selected = 0;
+        } else {
+            self.selected += 1;
+        }
+    }
+
+    pub fn go_back(&mut self) -> Result<()> {
+        let parent = self.cwd.parent();
+
+        if let Some(parent) = parent {
+            self.cwd = parent.to_path_buf();
+            self.get_and_set_files()?;
+            self.selected = 0
+        }
+
+        Ok(())
+    }
+
+    pub fn enter_dir(&mut self) -> Result<()> {
+        if self.files[self.selected].path.is_dir() {
+            self.cwd = self.files.swap_remove(self.selected).path;
+            self.get_and_set_files()?;
+            self.selected = 0
+        }
+
+        Ok(())
+    }
+
     pub fn handle<I: Into<Input>>(&mut self, input: I) -> Result<()> {
         let input = input.into();
 
