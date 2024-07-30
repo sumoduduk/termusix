@@ -25,12 +25,14 @@ pub fn save_local_music(
     index_id: usize,
 ) -> Option<()> {
     for song in song_list {
-        let os_name = song.file_stem().map(|s| s.to_str())??;
+        let os_name = song.file_stem().and_then(|os_str| os_str.to_str());
         let music_info = playlist.0.get_index_mut(index_id)?;
-        music_info
-            .1
-            .music_list
-            .insert(song.to_str()?.to_owned(), os_name.to_owned());
+        if let Some(os_name) = os_name {
+            music_info
+                .1
+                .music_list
+                .insert(song.to_str()?.to_owned(), os_name.to_owned());
+        }
     }
 
     Some(())
