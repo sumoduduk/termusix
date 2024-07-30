@@ -4,9 +4,10 @@ use ratatui::{
     widgets::{Block, Clear, Paragraph, Widget},
 };
 
-use crate::{app::App, user_interface::cursor::Cursor};
-
-use super::centered_rect;
+use crate::{
+    app::{centered_rect, App},
+    user_interface::cursor::Cursor,
+};
 
 pub fn render_popup_playlist(app: &App, area: Rect, buf: &mut Buffer, cursor: &mut Cursor) {
     let pop_up_area = centered_rect(60, 10, area);

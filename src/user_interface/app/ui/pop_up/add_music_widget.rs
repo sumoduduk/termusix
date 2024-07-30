@@ -7,11 +7,11 @@ use ratatui::{
 use tui_input::Input;
 
 use crate::{
-    app::app_state::AddSongState,
+    app::{app_state::AddSongState, centered_rect},
     user_interface::cursor::{AppState, Cursor},
 };
 
-use super::{centered_rect, list_folder_add::render_list_add_path};
+use super::list_folder_add::render_list_add_path;
 
 #[derive(Debug, Default)]
 pub struct AddMusicPopUp {
