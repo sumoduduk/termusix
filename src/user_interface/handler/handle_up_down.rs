@@ -8,6 +8,9 @@ pub fn handle_key_up(app: &mut App) {
         Screen::ListMusic => {
             app.music_list.select_previous();
         }
+        Screen::PopUpFileExplorer => {
+            app.file_explorer.scroll_up();
+        }
         _ => {}
     }
 }
@@ -21,6 +24,9 @@ pub fn handle_key_down(app: &mut App) {
             app.music_list.select_next();
         }
 
+        Screen::PopUpFileExplorer => {
+            app.file_explorer.scroll_down();
+        }
         _ => {}
     }
 }
