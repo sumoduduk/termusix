@@ -1,5 +1,6 @@
 mod handle_d;
 mod handle_enter;
+mod handle_left_right;
 mod handle_up_down;
 pub mod input_playlist_handler;
 mod insert_playlist_song;
@@ -10,6 +11,7 @@ use crate::app::{App, AppResult};
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use handle_d::handle_delete_key;
 use handle_enter::enter_key;
+use handle_left_right::{hande_left, hande_right};
 use handle_up_down::{handle_key_down, handle_key_up};
 use insert_playlist_song::handle_a;
 use play::play_and_download;
@@ -24,9 +26,12 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<
             app.quit();
         }
 
-        KeyCode::Esc => {
-            app.quit();
-        }
+        KeyCode::Esc => match app.screen_state {
+            Screen::PopUpFileExplorer => app.screen_state = Screen::ListMusic,
+            _ => {
+                app.quit();
+            }
+        },
         // Exit application on `Ctrl-C`
         KeyCode::Char('c') | KeyCode::Char('C') => {
             if key_event.modifiers == KeyModifiers::CONTROL {
@@ -36,7 +41,13 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<
         KeyCode::Tab => {
             app.next_screen();
         }
+        KeyCode::Left | KeyCode::Char('h') => {
+            hande_left(app);
+        }
 
+        KeyCode::Right | KeyCode::Char('l') => {
+            hande_right(app);
+        }
         KeyCode::Up => handle_key_up(app),
         KeyCode::Down => handle_key_down(app),
         KeyCode::Enter => enter_key(app).await,
