@@ -15,14 +15,15 @@ use ratatui::{
     style::{palette::tailwind::SLATE, Modifier, Style},
 };
 
-use crate::user_interface::cursor::Cursor;
+use crate::user_interface::cursor::AppState;
 
 use super::App;
+pub use pop_up::add_music_widget;
 use Constraint::*;
 
 const SELECTED_STYLE: Style = Style::new().bg(SLATE.c800).add_modifier(Modifier::BOLD);
 
-pub fn render(app: &mut App, area: Rect, buf: &mut Buffer, cursor: &mut Cursor) {
+pub fn render(app: &mut App, area: Rect, buf: &mut Buffer, app_state: &mut AppState) {
     let main_screen = Layout::vertical([Percentage(100), Min(3)]);
     let [main_layout, footer_layout] = main_screen.areas(area);
 
@@ -36,5 +37,5 @@ pub fn render(app: &mut App, area: Rect, buf: &mut Buffer, cursor: &mut Cursor) 
     render_playlist(app, playlist_layout, buf);
     render_music_list(app, music_list_layout, buf);
     render_footer(app, footer_layout, buf);
-    render_popup(app, area, buf, cursor);
+    render_popup(app, area, buf, app_state);
 }
