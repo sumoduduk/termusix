@@ -14,6 +14,7 @@ pub enum Screen {
     ListMusic,
     InsertPlaylist,
     AddSongPopup(AddSongPopup),
+    PopUpFileExplorer,
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
