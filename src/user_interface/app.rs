@@ -9,7 +9,12 @@ use std::sync::mpsc::Sender;
 use tui_input::Input;
 use ui::add_music_widget::AddMusicPopUp;
 
-use crate::{playback::PlaybackEvent, playlist::Playlist, NowPlaying};
+use crate::{
+    file_song::{FileExplorer, Theme},
+    playback::PlaybackEvent,
+    playlist::Playlist,
+    NowPlaying,
+};
 
 use super::cursor::AppState;
 
@@ -35,6 +40,7 @@ pub struct App {
     pub now_playing: NowPlaying,
     pub input_playlist: Input,
     pub add_song_popup: AddMusicPopUp,
+    pub file_explorer: FileExplorer,
 }
 
 // impl Default for App {
@@ -46,6 +52,9 @@ impl App {
     pub fn new(tx: Sender<PlaybackEvent>, now_playing: NowPlaying) -> Self {
         let playlist = Playlist::new().expect("ERROR: No playlist found");
 
+        let theme = Theme::default().add_default_title();
+        let file_explorer = FileExplorer::with_theme(theme).unwrap();
+
         Self {
             running: true,
             music_list: ListState::default(),
@@ -56,6 +65,7 @@ impl App {
             now_playing,
             input_playlist: Input::default(),
             add_song_popup: AddMusicPopUp::default(),
+            file_explorer,
         }
     }
 
