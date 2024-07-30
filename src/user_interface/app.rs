@@ -5,9 +5,8 @@ use ratatui::{
     widgets::{ListState, StatefulWidget},
 };
 use screen::{get_border_color, Screen};
-use std::{ops::Deref, path::PathBuf, sync::mpsc::Sender};
+use std::{path::PathBuf, sync::mpsc::Sender};
 use tui_input::Input;
-use ui::add_music_widget::AddMusicPopUp;
 
 use crate::{
     file_song::{FileExplorer, Theme},
@@ -18,7 +17,6 @@ use crate::{
 
 use super::cursor::AppState;
 
-mod app_state;
 pub mod screen;
 mod ui;
 pub mod widget_list_add;
@@ -40,7 +38,6 @@ pub struct App {
     pub tx_playback: Sender<PlaybackEvent>,
     pub now_playing: NowPlaying,
     pub input_playlist: Input,
-    pub add_song_popup: AddMusicPopUp,
     pub file_explorer: FileExplorer,
     pub list_to_add: Vec<PathBuf>,
 }
@@ -66,7 +63,6 @@ impl App {
             tx_playback: tx,
             now_playing,
             input_playlist: Input::default(),
-            add_song_popup: AddMusicPopUp::default(),
             file_explorer,
             list_to_add: Vec::default(),
         }
