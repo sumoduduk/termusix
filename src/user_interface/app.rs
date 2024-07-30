@@ -7,10 +7,11 @@ use ratatui::{
 use screen::{get_border_color, Screen};
 use std::sync::mpsc::Sender;
 use tui_input::Input;
+use ui::add_music_widget::AddMusicPopUp;
 
 use crate::{playback::PlaybackEvent, playlist::Playlist, NowPlaying};
 
-use super::cursor::Cursor;
+use super::cursor::AppState;
 
 mod app_state;
 pub mod screen;
@@ -33,6 +34,7 @@ pub struct App {
     pub tx_playback: Sender<PlaybackEvent>,
     pub now_playing: NowPlaying,
     pub input_playlist: Input,
+    pub add_song_popup: AddMusicPopUp,
 }
 
 // impl Default for App {
@@ -53,6 +55,7 @@ impl App {
             tx_playback: tx,
             now_playing,
             input_playlist: Input::default(),
+            add_song_popup: AddMusicPopUp::default(),
         }
     }
 
@@ -106,19 +109,6 @@ impl App {
         Some((res, i))
     }
 
-    // pub fn play_music(&self) {
-    //     let idx = self.tabs_playlist.selected().unwrap_or(0);
-    //
-    //     if let Some(playlist) = self.playlist.list_music_by_idx(Some(idx)) {
-    //         let data: Vec<String> = playlist
-    //             .keys()
-    //             .map(|id| ["music/", id, ".mp3"].concat())
-    //             .collect();
-    //
-    //         let _ = self.tx_playback.send(PlaybackEvent::Playlist(data));
-    //     }
-    // }
-
     pub fn pause_toggle(&self) {
         let _ = self.tx_playback.send(PlaybackEvent::PauseToggle);
     }
@@ -147,7 +137,7 @@ impl App {
 }
 
 impl StatefulWidget for &mut App {
-    type State = Cursor;
+    type State = AppState;
     fn render(self, area: Rect, buf: &mut Buffer, state: &mut Self::State) {
         ui::render(self, area, buf, state);
     }
