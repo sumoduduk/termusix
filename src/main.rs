@@ -1,5 +1,6 @@
 mod download;
 mod file_ops;
+mod file_song;
 mod playback;
 mod playlist;
 mod user_interface;
