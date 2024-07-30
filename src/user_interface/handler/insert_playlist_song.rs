@@ -9,7 +9,7 @@ pub fn handle_a(app: &mut App) {
             app.screen_state = Screen::InsertPlaylist;
         }
         Screen::ListMusic => {
-            app.screen_state = Screen::AddSongPopup(AddSongPopup::default());
+            app.screen_state = Screen::PopUpFileExplorer;
         }
         _ => {}
     }
