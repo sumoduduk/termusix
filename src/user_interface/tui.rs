@@ -7,7 +7,7 @@ use ratatui::Terminal;
 use std::io;
 use std::panic;
 
-use super::cursor::Cursor;
+use super::cursor::{AppState, Cursor};
 
 /// Representation of a terminal user interface.
 ///
@@ -53,11 +53,11 @@ impl<B: Backend> Tui<B> {
     /// [`rendering`]: crate::ui::render
     pub fn draw(&mut self, app: &mut App) -> AppResult<()> {
         self.terminal.draw(|frame| {
-            let mut cursor = Cursor::default();
+            let mut app_state = AppState::default();
 
-            frame.render_stateful_widget(app, frame.size(), &mut cursor);
+            frame.render_stateful_widget(app, frame.size(), &mut app_state);
 
-            if let Some(position) = cursor.take() {
+            if let Some(position) = app_state.cursor.take() {
                 frame.set_cursor(position.0, position.1);
             }
         })?;
