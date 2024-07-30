@@ -5,10 +5,10 @@ mod save_playlist;
 use delete_playlist::{remove_playlist, remove_song};
 use eyre::OptionExt;
 use indexmap::IndexMap;
-use save_local::save_local;
+use save_local::{save_local, save_local_music};
 use save_playlist::{get_playlist, save_file_json, save_id};
 use serde::{Deserialize, Serialize};
-use std::fs;
+use std::{fs, path::PathBuf};
 
 use crate::{file_ops::check_file_exist_sync, utils::shuffle_vec};
 
@@ -50,6 +50,13 @@ impl Playlist {
 
     pub fn save_local_playlist(&mut self, id: &str) -> eyre::Result<()> {
         save_local(self, id);
+
+        save_file_json(&self.0)?;
+        Ok(())
+    }
+
+    pub fn save_local_song(&mut self, song_list: &[PathBuf], index_id: usize) -> eyre::Result<()> {
+        save_local_music(self, song_list, index_id);
 
         save_file_json(&self.0)?;
         Ok(())
