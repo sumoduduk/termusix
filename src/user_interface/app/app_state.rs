@@ -1,14 +1,11 @@
 use std::path::PathBuf;
 
-use ratatui::widgets::ListState;
 use tokio::fs;
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct AddSongState {
     folder_file: Vec<PathBuf>,
     add_paths: Vec<PathBuf>,
-    pub file_scroll: ListState,
-    pub music_scroll: ListState,
 }
 
 impl AddSongState {
