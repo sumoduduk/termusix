@@ -18,7 +18,6 @@ use ratatui::{
 use crate::user_interface::cursor::AppState;
 
 use super::App;
-pub use pop_up::add_music_widget;
 use Constraint::*;
 
 const SELECTED_STYLE: Style = Style::new().bg(SLATE.c800).add_modifier(Modifier::BOLD);
