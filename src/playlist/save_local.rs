@@ -21,7 +21,7 @@ pub fn save_local(playlist: &mut Playlist, id: &str) {
 
 pub fn save_local_music(
     playlist: &mut Playlist,
-    song_list: Vec<PathBuf>,
+    song_list: &[PathBuf],
     index_id: usize,
 ) -> Option<()> {
     for song in song_list {
