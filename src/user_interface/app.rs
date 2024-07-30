@@ -1,11 +1,11 @@
 use ratatui::{
     buffer::Buffer,
-    layout::Rect,
+    layout::{Constraint, Layout, Rect},
     style::Style,
     widgets::{ListState, StatefulWidget},
 };
 use screen::{get_border_color, Screen};
-use std::sync::mpsc::Sender;
+use std::{ops::Deref, path::PathBuf, sync::mpsc::Sender};
 use tui_input::Input;
 use ui::add_music_widget::AddMusicPopUp;
 
@@ -21,6 +21,7 @@ use super::cursor::AppState;
 mod app_state;
 pub mod screen;
 mod ui;
+pub mod widget_list_add;
 // use std::error;
 
 /// Application result type.
@@ -41,6 +42,7 @@ pub struct App {
     pub input_playlist: Input,
     pub add_song_popup: AddMusicPopUp,
     pub file_explorer: FileExplorer,
+    pub list_to_add: Vec<PathBuf>,
 }
 
 // impl Default for App {
@@ -66,6 +68,7 @@ impl App {
             input_playlist: Input::default(),
             add_song_popup: AddMusicPopUp::default(),
             file_explorer,
+            list_to_add: Vec::default(),
         }
     }
 
@@ -144,6 +147,29 @@ impl App {
         };
         id
     }
+
+    pub fn push_song_from_explorer(&mut self) {
+        let path = self.file_explorer.current().path();
+        let extention = path.extension().and_then(|os_str| os_str.to_str());
+
+        if let Some(ext) = extention {
+            if ext == "mp4" || ext == "mp3" {
+                self.list_to_add.push(path.into())
+            }
+        }
+    }
+
+    pub fn save_song_to_playlist(&mut self) {
+        let paths_songs = &self.list_to_add;
+
+        if !paths_songs.is_empty() {
+            if let Some(index) = self.tabs_playlist.selected() {
+                if self.playlist.save_local_song(paths_songs, index).is_ok() {
+                    self.list_to_add.clear();
+                }
+            }
+        }
+    }
 }
 
 impl StatefulWidget for &mut App {
@@ -151,4 +177,20 @@ impl StatefulWidget for &mut App {
     fn render(self, area: Rect, buf: &mut Buffer, state: &mut Self::State) {
         ui::render(self, area, buf, state);
     }
+}
+
+pub fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
+    let popup_layout = Layout::vertical([
+        Constraint::Percentage((100 - percent_y) / 2),
+        Constraint::Percentage(percent_y),
+        Constraint::Percentage((100 - percent_y) / 2),
+    ])
+    .split(r);
+
+    Layout::horizontal([
+        Constraint::Percentage((100 - percent_x) / 2),
+        Constraint::Percentage(percent_x),
+        Constraint::Percentage((100 - percent_x) / 2),
+    ])
+    .split(popup_layout[1])[1]
 }
