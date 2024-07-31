@@ -1,3 +1,4 @@
+use cwd_dirs::get_music_path;
 use ratatui::{
     buffer::Buffer,
     layout::{Constraint, Layout, Rect},
@@ -17,6 +18,7 @@ use crate::{
 
 use super::cursor::AppState;
 
+mod cwd_dirs;
 pub mod screen;
 mod ui;
 pub mod widget_list_add;
@@ -52,7 +54,11 @@ impl App {
         let playlist = Playlist::new().expect("ERROR: No playlist found");
 
         let theme = Theme::default().add_default_title();
-        let file_explorer = FileExplorer::with_theme(theme).unwrap();
+        let mut file_explorer = FileExplorer::with_theme(theme).unwrap();
+
+        if let Some(music_path) = get_music_path() {
+            let _ = file_explorer.set_cwd(music_path);
+        }
 
         Self {
             running: true,
