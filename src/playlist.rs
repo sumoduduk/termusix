@@ -138,6 +138,23 @@ impl Playlist {
 
         Ok(music_ids)
     }
+
+    pub fn get_playlist_tittle(&self, index: Option<usize>) -> Option<&str> {
+        let (_, info) = self.0.get_index(index?)?;
+
+        Some(&info.playlist_title)
+    }
+
+    pub fn get_music_title(
+        &self,
+        index_playlist: Option<usize>,
+        index_song: Option<usize>,
+    ) -> Option<&str> {
+        let (_, info) = self.0.get_index(index_playlist?)?;
+        let (_, title) = info.music_list.get_index(index_song?)?;
+
+        Some(title)
+    }
 }
 
 #[cfg(test)]
