@@ -42,6 +42,7 @@ pub struct App {
     pub input_playlist: Input,
     pub file_explorer: FileExplorer,
     pub list_to_add: Vec<PathBuf>,
+    pub pop_up_confirm: bool,
 }
 
 // impl Default for App {
@@ -71,6 +72,7 @@ impl App {
             input_playlist: Input::default(),
             file_explorer,
             list_to_add: Vec::default(),
+            pop_up_confirm: false,
         }
     }
 
@@ -170,6 +172,28 @@ impl App {
                     self.list_to_add.clear();
                 }
             }
+        }
+    }
+
+    pub fn pop_up_msg(&self) -> Option<(&str, String)> {
+        let msg = "Are you sure you want to delete  ";
+
+        let index_playlist = self.tabs_playlist.selected();
+
+        match self.screen_state {
+            Screen::Playlist => self
+                .playlist
+                .get_playlist_tittle(index_playlist)
+                .map(|s| ("Delete Playlist", [msg, s, "?"].concat())),
+
+            Screen::ListMusic => {
+                let index_song = self.music_list.selected();
+                self.playlist
+                    .get_music_title(index_playlist, index_song)
+                    .map(|s| ("Delete Song", [msg, s, "?"].concat()))
+            }
+
+            _ => None,
         }
     }
 }
