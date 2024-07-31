@@ -1,3 +1,4 @@
+mod handle_confirm;
 mod handle_d;
 mod handle_enter;
 mod handle_left_right;
@@ -9,6 +10,7 @@ mod play;
 
 use crate::app::{App, AppResult};
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use handle_confirm::handle_confirm_popup;
 use handle_d::handle_delete_key;
 use handle_enter::enter_key;
 use handle_left_right::{hande_left, hande_right};
@@ -78,7 +80,9 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<
         }
 
         //add another
-        _ => {}
+        _ => {
+            handle_confirm_popup(app, key_event);
+        }
     }
     Ok(())
 }
