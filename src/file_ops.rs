@@ -1,5 +1,24 @@
-use std::fs::metadata as metada_sync;
-use tokio::fs::metadata;
+use std::{fs::metadata as metada_sync, path::Path, sync::mpsc::Sender};
+use tokio::fs::{metadata, read_dir};
+
+use crate::playback::PlaybackEvent;
+
+pub async fn send_id_file_exist(
+    id: &str,
+    music_dir: &Path,
+    sender: Sender<PlaybackEvent>,
+) -> eyre::Result<()> {
+    let mut entries = read_dir(music_dir).await?;
+
+    while let Some(entry) = entries.next_entry().await? {
+        if let Some(path_file_name) = entry.file_name().to_str() {
+            if path_file_name.contains(id) {
+                let _ = sender.send(PlaybackEvent::Add(entry.path()));
+            }
+        }
+    }
+    Ok(())
+}
 
 pub async fn check_file_exist(file_name: &str) -> Option<&str> {
     let meta_res = metadata(file_name).await;
