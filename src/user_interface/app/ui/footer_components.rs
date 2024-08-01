@@ -2,19 +2,19 @@ use ratatui::{
     buffer::Buffer,
     layout::Rect,
     style::Color,
-    widgets::{Block, BorderType, Borders, Paragraph, Widget},
+    widgets::{Block, BorderType, Borders, Paragraph, Widget, Wrap},
 };
 
 use crate::app::{App, Screen};
 
 pub fn render_footer(app: &App, footer_layout: Rect, buf: &mut Buffer) {
     let footer_msg = match app.screen_state {
-        Screen::Playback => "Press TAB to switch to Playlist | SPACE to toggle play/pause",
+        Screen::Playback => "Press TAB to switch to Playlist | (?) for help | SPACE to toggle play/pause",
         Screen::Playlist => {
-            "Press TAB/ENTER to switch to Music List | ⬆️ or ⬇️ to scroll playlist | P to play"
+            "Press TAB/ENTER to switch to Music List | (?) for help | ↑ or ↓ to scroll playlist | P to play"
         }
         Screen::ListMusic => {
-            "Press TAB to switch to Now Playing | ⬆️ or ⬇️ to scroll song | ENTER to play "
+            "Press TAB to switch to Now Playing | (?) for help | ↑ or ↓ to scroll song | ENTER to play"
         }
         _ => "",
     };
@@ -28,5 +28,6 @@ pub fn render_footer(app: &App, footer_layout: Rect, buf: &mut Buffer) {
     Paragraph::new(footer_msg)
         .block(block)
         .centered()
+        .wrap(Wrap { trim: true })
         .render(footer_layout, buf);
 }
