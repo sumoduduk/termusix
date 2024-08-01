@@ -24,7 +24,7 @@ pub fn render_list_to_add(app: &App) -> Paragraph {
 }
 
 pub fn render_pop_up_top() -> Paragraph<'static> {
-    let msg = "⬆️ or ⬇️ to scroll | ⬅️  to go back folder | ➡️ to enter folder directory ";
+    let msg = "↑ or ↓ to scroll | ← to go back folder | → to enter folder directory ";
 
     let block = Block::new()
         .borders(Borders::ALL)
