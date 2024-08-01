@@ -8,6 +8,7 @@ use ratatui::{
 use screen::{get_border_color, Screen};
 use std::{path::PathBuf, sync::mpsc::Sender};
 use tui_input::Input;
+use widget_playback_buttons::SelectedButton;
 
 use crate::{
     file_song::{FileExplorer, Theme},
@@ -22,6 +23,7 @@ mod cwd_dirs;
 pub mod screen;
 mod ui;
 pub mod widget_list_add;
+mod widget_playback_buttons;
 // use std::error;
 
 /// Application result type.
@@ -43,6 +45,7 @@ pub struct App {
     pub file_explorer: FileExplorer,
     pub list_to_add: Vec<PathBuf>,
     pub pop_up_confirm: bool,
+    pub playback_button: SelectedButton,
 }
 
 // impl Default for App {
@@ -73,6 +76,7 @@ impl App {
             file_explorer,
             list_to_add: Vec::default(),
             pop_up_confirm: false,
+            playback_button: SelectedButton::default(),
         }
     }
 
@@ -194,6 +198,31 @@ impl App {
             }
 
             _ => None,
+        }
+    }
+
+    pub fn button_next(&mut self) {
+        self.playback_button = self.playback_button.next();
+    }
+
+    pub fn button_prev(&mut self) {
+        self.playback_button = self.playback_button.previous();
+    }
+
+    fn render_title_right_inner(&self) -> Option<String> {
+        match self.screen_state {
+            Screen::Playback => Some("Press ← or → to scroll button playback".to_owned()),
+            Screen::Playlist => Some("Press A to add playlist".to_owned()),
+            Screen::ListMusic => Some("Press A to add song".to_owned()),
+            _ => None,
+        }
+    }
+
+    pub fn render_title_right(&self, screen: Screen) -> Option<String> {
+        if self.screen_state == screen {
+            self.render_title_right_inner()
+        } else {
+            None
         }
     }
 }
