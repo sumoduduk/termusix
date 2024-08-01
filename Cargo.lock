@@ -2811,6 +2811,7 @@ dependencies = [
  "rusty_ytdl",
  "serde",
  "serde_json",
+ "strum",
  "tokio",
  "tui-input",
 ]
