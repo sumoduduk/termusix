@@ -1,4 +1,8 @@
-use std::{collections::VecDeque, fs::File, path::Path};
+use std::{
+    collections::VecDeque,
+    fs::File,
+    path::{Path, PathBuf},
+};
 
 use rodio::{OutputStream, Sink};
 use std::sync::mpsc::Receiver;
@@ -6,9 +10,10 @@ use std::sync::mpsc::Receiver;
 use crate::NowPlaying;
 
 pub enum PlaybackEvent {
-    Playlist(VecDeque<String>),
+    Playlist(VecDeque<PathBuf>),
     PauseToggle,
-    Add(String),
+    Add(PathBuf),
+    TrackPlay((usize, usize)),
     Forward,
     Backward,
     Quit,
@@ -22,6 +27,8 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
 
         let mut playlist = VecDeque::new();
         let mut is_played = true;
+        let mut playlist_id = 0;
+        let mut song_id = 0;
 
         while is_played {
             if let Ok(evt) = rx.try_recv() {
@@ -40,8 +47,19 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
                     PlaybackEvent::Add(id) => {
                         playlist.push_back(id);
                     }
+                    PlaybackEvent::TrackPlay((p_id, s_id)) => {
+                        if playlist_id != p_id {
+                            playlist.clear();
+                            playlist_id = p_id;
+                        }
+
+                        if song_id != s_id {
+                            sink.clear();
+                            song_id = s_id;
+                        }
+                    }
                     PlaybackEvent::Quit => {
-                        playlist = VecDeque::with_capacity(1);
+                        playlist.clear();
                         sink.clear();
                         is_played = false;
                     }
@@ -65,23 +83,29 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
             }
 
             if sink.empty() {
-                if let Some(music_file) = playlist.pop_front() {
+                if let Some(music_file) = playlist.get(song_id) {
                     if let Ok(mut song_name) = now_playing.try_write() {
-                        let new_playing = extract_id(&music_file);
-                        *song_name = new_playing;
+                        *song_name = music_file.to_str().map(|s| s.to_owned());
                     }
 
-                    if let Ok(file) = File::open(&music_file) {
+                    if let Ok(file) = File::open(music_file) {
                         match rodio::Decoder::new(file) {
                             Ok(source) => {
                                 sink.append(source);
                                 sink.play();
                             }
                             Err(err) => {
-                                eprintln!("ERROR: can't add {} into playlist {err}", &music_file)
+                                eprintln!(
+                                    "ERROR: can't add {} into playlist {err}",
+                                    &music_file.display()
+                                )
                             }
                         }
-                        playlist.push_back(music_file);
+                        if song_id > playlist.len() - 1 {
+                            song_id = 0;
+                        } else {
+                            song_id += 1;
+                        }
                     }
                 }
             }
@@ -90,10 +114,8 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
     });
 }
 
-fn extract_id(file_name: &str) -> Option<String> {
-    let path = Path::new(file_name);
-
-    let os_name = path.file_stem().map(|s| s.to_str())??;
+fn extract_id(file_name: &Path) -> Option<String> {
+    let os_name = file_name.file_stem().map(|s| s.to_str())??;
     Some(os_name.to_owned())
 }
 
@@ -103,7 +125,7 @@ mod tests {
 
     #[test]
     fn test_steming_1() {
-        let file_path = "music/12343.mp3";
+        let file_path = Path::new("music/12343.mp3");
         let name = extract_id(file_path).unwrap_or_default();
         dbg!(&name);
 
@@ -112,7 +134,7 @@ mod tests {
 
     #[test]
     fn test_steming_2() {
-        let file_path = "music/Linking Park.mp3";
+        let file_path = Path::new("music/Linking Park.mp3");
         let name = extract_id(file_path).unwrap_or_default();
 
         assert_eq!("Linking Park".to_owned(), name);
@@ -120,7 +142,7 @@ mod tests {
 
     #[test]
     fn test_steming_3() {
-        let file_path = "music/Lar-uku.mp3";
+        let file_path = Path::new("music/Lar-uku.mp3");
         let name = extract_id(file_path).unwrap_or_default();
 
         assert_eq!("Lar-uku".to_owned(), name);
