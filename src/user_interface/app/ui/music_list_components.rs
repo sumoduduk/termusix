@@ -23,7 +23,7 @@ pub fn render_music_list(app: &mut App, music_list_layout: Rect, buf: &mut Buffe
         .border_style(app.get_border_color(Screen::ListMusic));
 
     let indx = app.tabs_playlist.selected();
-    let music = app.list_downloaded_first(indx);
+    let music = app.list_playlist_music(indx).unwrap_or_default();
 
     let music_list = List::new(music)
         .block(music_block)
