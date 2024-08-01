@@ -100,43 +100,12 @@ impl Playlist {
         titles
     }
 
-    pub fn list_music_by_idx(&self, indx: Option<usize>) -> Option<MusicInfo> {
+    pub fn list_music_by_idx(&self, indx: Option<usize>) -> Option<&MusicInfo> {
         let indx = indx?;
         let info_playlist = self.0.get_index(indx)?;
 
         let music = &info_playlist.1.music_list;
-        Some(music.clone())
-    }
-
-    pub fn list_music_sorted(&self, indx: Option<usize>) -> Option<(MusicInfo, usize)> {
-        let mut list_music = self.list_music_by_idx(indx)?;
-
-        let mut i = 0;
-        for (id, _) in list_music.clone().iter() {
-            let file_name = ["music/", id, ".mp3"].concat();
-            if check_file_exist_sync(&file_name).is_some() {
-                if let Some(index) = list_music.get_index_of(id) {
-                    list_music.swap_indices(index, i);
-                    i += 1;
-                }
-            }
-        }
-
-        Some((list_music, i))
-    }
-
-    pub fn list_shuffled_music_id(&self, id: &str) -> eyre::Result<Vec<String>> {
-        let music_playlist = &self.0;
-
-        let info_playlist = music_playlist
-            .get(id)
-            .ok_or_eyre("ERROR: Id playlist not found")?;
-
-        let mut music_ids: Vec<String> =
-            info_playlist.music_list.keys().map(|s| s.into()).collect();
-        shuffle_vec(&mut music_ids);
-
-        Ok(music_ids)
+        Some(music)
     }
 
     pub fn get_playlist_tittle(&self, index: Option<usize>) -> Option<&str> {
