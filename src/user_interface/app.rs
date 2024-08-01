@@ -105,29 +105,17 @@ impl App {
     }
 
     pub fn list_playlist_music(&self, indx: Option<usize>) -> Option<Vec<String>> {
-        let music_l = self.playlist.list_music_by_idx(indx);
-        if let Some(list) = music_l {
-            let s: Vec<_> = list.into_values().collect();
-            Some(s)
-        } else {
-            None
-        }
+        let music_l = self.playlist.list_music_by_idx(indx)?;
+
+        let list: Vec<_> = music_l.values().map(|s| s.to_owned()).collect();
+        Some(list)
     }
 
-    pub fn list_downloaded_first(&self, indx: Option<usize>) -> Vec<String> {
-        let Some((list_music, _)) = self.playlist.list_music_sorted(indx) else {
-            return vec![];
-        };
+    pub fn list_playlist_song_id(&self, indx: Option<usize>) -> Option<Vec<String>> {
+        let music_l = self.playlist.list_music_by_idx(indx)?;
 
-        let res: Vec<String> = list_music.values().map(|name| name.to_owned()).collect();
-        res
-    }
-
-    pub fn list_id_downloaded_first(&self, indx: Option<usize>) -> Option<(Vec<String>, usize)> {
-        let (list_music, i) = self.playlist.list_music_sorted(indx)?;
-
-        let res: Vec<String> = list_music.keys().map(|name| name.to_owned()).collect();
-        Some((res, i))
+        let list: Vec<_> = music_l.keys().map(|s| s.to_owned()).collect();
+        Some(list)
     }
 
     pub fn pause_toggle(&self) {
@@ -147,8 +135,8 @@ impl App {
             let name_id = ids.as_ref()?;
 
             let selected = self.tabs_playlist.selected();
-            let list = self.playlist.list_music_sorted(selected)?;
-            let name_song = list.0.get_key_value(name_id)?;
+            let list = self.playlist.list_music_by_idx(selected)?;
+            let name_song = list.get_key_value(name_id)?;
             Some(name_song.1.to_owned())
         } else {
             None
