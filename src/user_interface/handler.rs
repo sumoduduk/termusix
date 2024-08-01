@@ -36,6 +36,9 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<
                 }
                 app.screen_state = Screen::ListMusic;
             }
+            Screen::HelpPopup => {
+                app.screen_state = Screen::Playlist;
+            }
             _ => {
                 app.quit();
             }
@@ -69,6 +72,15 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<
                 play_and_download(app).await;
             }
             _ => {}
+        },
+
+        KeyCode::Char('?') => match app.screen_state {
+            Screen::HelpPopup => {
+                app.screen_state = Screen::Playlist;
+            }
+            _ => {
+                app.screen_state = Screen::HelpPopup;
+            }
         },
 
         KeyCode::PageUp => {
