@@ -1,4 +1,3 @@
-mod download;
 mod file_ops;
 mod file_song;
 mod playback;
