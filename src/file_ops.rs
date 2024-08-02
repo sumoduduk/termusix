@@ -41,8 +41,12 @@ pub fn decode_file(path: &Path) -> eyre::Result<Decoder<File>> {
     }
 }
 
-fn extract_extentions(path: &Path) -> Option<&str> {
+pub fn extract_extentions(path: &Path) -> Option<&str> {
     path.extension().and_then(|ext| ext.to_str())
+}
+
+pub fn get_parent(path: &Path) -> Option<&Path> {
+    path.parent()
 }
 
 pub async fn check_file_exist(file_name: &str) -> Option<&str> {
