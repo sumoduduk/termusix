@@ -1,13 +1,12 @@
 use std::{
     collections::VecDeque,
-    fs::File,
     path::{Path, PathBuf},
 };
 
 use rodio::{OutputStream, Sink};
 use std::sync::mpsc::Receiver;
 
-use crate::NowPlaying;
+use crate::{file_ops::decode_file, NowPlaying};
 
 pub enum PlaybackEvent {
     Playlist(VecDeque<PathBuf>),
@@ -88,24 +87,18 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
                         *song_name = music_file.to_str().map(|s| s.to_owned());
                     }
 
-                    if let Ok(file) = File::open(music_file) {
-                        match rodio::Decoder::new(file) {
-                            Ok(source) => {
-                                sink.append(source);
-                                sink.play();
-                            }
-                            Err(err) => {
-                                eprintln!(
-                                    "ERROR: can't add {} into playlist {err}",
-                                    &music_file.display()
-                                )
-                            }
+                    match decode_file(music_file) {
+                        Ok(decoded) => {
+                            sink.append(decoded);
+                            sink.play();
                         }
-                        if song_id > playlist.len() - 1 {
-                            song_id = 0;
-                        } else {
-                            song_id += 1;
-                        }
+                        Err(err) => println!("{err}"),
+                    }
+
+                    if song_id > playlist.len() - 1 {
+                        song_id = 0;
+                    } else {
+                        song_id += 1;
                     }
                 }
             }
