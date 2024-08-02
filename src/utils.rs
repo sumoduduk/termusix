@@ -2,6 +2,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use rand::XorShiftRng;
 
+pub mod convert;
 mod rand;
 
 pub fn shuffle_vec<T>(arr: &mut [T]) {
