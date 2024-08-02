@@ -3,14 +3,11 @@ mod save_local;
 mod save_playlist;
 
 use delete_playlist::{remove_playlist, remove_song};
-use eyre::OptionExt;
 use indexmap::IndexMap;
 use save_local::{save_local, save_local_music};
 use save_playlist::{get_playlist, save_file_json, save_id};
 use serde::{Deserialize, Serialize};
 use std::{fs, path::PathBuf};
-
-use crate::{file_ops::check_file_exist_sync, utils::shuffle_vec};
 
 // #[derive(Serialize, Deserialize, Debug, PartialEq)]
 // struct MusicInfo {
