@@ -1,4 +1,10 @@
-use std::{fs::metadata as metada_sync, path::Path, sync::mpsc::Sender};
+use eyre::{eyre, Context};
+use rodio::Decoder;
+use std::{
+    fs::{metadata as metada_sync, File},
+    path::Path,
+    sync::mpsc::Sender,
+};
 use tokio::fs::{metadata, read_dir};
 
 use crate::playback::PlaybackEvent;
@@ -18,6 +24,25 @@ pub async fn send_id_file_exist(
         }
     }
     Ok(())
+}
+
+pub fn decode_file(path: &Path) -> eyre::Result<Decoder<File>> {
+    if let Ok(file) = File::open(path) {
+        let decoder = match extract_extentions(path) {
+            Some("mp4") => rodio::Decoder::new_mp4(file, rodio::decoder::Mp4Type::M4a)
+                .wrap_err("cant decode file"),
+            Some("mp3") => rodio::Decoder::new(file).wrap_err("cant decode file"),
+            _ => Err(eyre!("ERROR: not mp3 and mp4 file")),
+        };
+
+        decoder
+    } else {
+        Err(eyre!("ERROR: cant open file"))
+    }
+}
+
+fn extract_extentions(path: &Path) -> Option<&str> {
+    path.extension().and_then(|ext| ext.to_str())
 }
 
 pub async fn check_file_exist(file_name: &str) -> Option<&str> {
