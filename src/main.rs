@@ -19,8 +19,6 @@ use utils::convert::convert_folder;
 use user_interface::event::Event;
 use user_interface::*;
 
-type NowPlaying = Arc<RwLock<Option<String>>>;
-
 #[derive(Serialize, Deserialize, Clone, Debug, Default, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct VideoResult {
@@ -29,6 +27,14 @@ pub struct VideoResult {
     author: String,
     length_seconds: usize,
 }
+
+#[derive(Debug, Default)]
+struct NowPlayingData {
+    playlist_id: Option<usize>,
+    song_title: Option<String>,
+}
+
+type NowPlaying = Arc<RwLock<NowPlayingData>>;
 
 #[derive(Deserialize, Serialize, Default, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -59,7 +65,7 @@ async fn main() -> eyre::Result<()> {
         // Create an application.
 
         let (tx, rx) = std::sync::mpsc::channel();
-        let now_playing: NowPlaying = Arc::new(RwLock::new(None::<String>));
+        let now_playing: NowPlaying = Arc::new(RwLock::new(NowPlayingData::default()));
         let now_playing_app = Arc::clone(&now_playing);
 
         let mut app = App::new(tx, now_playing_app);
