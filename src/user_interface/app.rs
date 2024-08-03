@@ -23,7 +23,6 @@ mod cwd_dirs;
 pub mod screen;
 mod ui;
 pub mod widget_list_add;
-mod widget_playback_buttons;
 pub mod widget_playback_buttons;
 // use std::error;
 
@@ -151,11 +150,28 @@ impl App {
         }
     }
 
+    pub fn get_now_playing_id(&self) -> Option<usize> {
+        if let Ok(now_playing) = self.now_playing.read() {
+            now_playing.playlist_id
+        } else {
+            None
+        }
+    }
+
     pub fn save_song_to_playlist(&mut self) {
         let paths_songs = &self.list_to_add;
 
         if !paths_songs.is_empty() {
             if let Some(index) = self.tabs_playlist.selected() {
+                if let Some(idx) = self.get_now_playing_id() {
+                    if index == idx {
+                        paths_songs.iter().for_each(|p| {
+                            let sender = self.tx_playback.clone();
+                            let _ = sender.send(PlaybackEvent::Add(p.to_path_buf()));
+                        })
+                    }
+                }
+
                 if self.playlist.save_local_song(paths_songs, index).is_ok() {
                     self.list_to_add.clear();
                 }
