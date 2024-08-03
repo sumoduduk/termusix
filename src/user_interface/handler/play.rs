@@ -22,7 +22,10 @@ pub async fn play_and_download(app: &App) {
             .filter(|f| f.is_file())
             .collect();
 
-        let _ = sender.send(PlaybackEvent::Playlist(song_paths));
+        let _ = sender.send(PlaybackEvent::Playlist((
+            indx.unwrap_or_default(),
+            song_paths,
+        )));
     } else {
         let home = dirs::home_dir().expect("need home dir");
         let music_dir = dirs::audio_dir().unwrap_or(home.join("Music"));
@@ -59,8 +62,4 @@ pub async fn play_and_download(app: &App) {
     //         }
     //     });
     // }
-}
-
-fn concat_file(id: &str) -> String {
-    ["music/", id, ".mp3"].concat()
 }
