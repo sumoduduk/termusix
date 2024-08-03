@@ -24,6 +24,7 @@ pub mod screen;
 mod ui;
 pub mod widget_list_add;
 mod widget_playback_buttons;
+pub mod widget_playback_buttons;
 // use std::error;
 
 /// Application result type.
