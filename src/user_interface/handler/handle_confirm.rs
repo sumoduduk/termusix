@@ -1,6 +1,9 @@
 use crossterm::event::{KeyCode, KeyEvent};
 
-use crate::app::{screen::Screen, App};
+use crate::{
+    app::{screen::Screen, App},
+    playback::PlaybackEvent,
+};
 
 pub fn handle_y_key(app: &mut App) {
     match app.screen_state {
@@ -13,6 +16,9 @@ pub fn handle_y_key(app: &mut App) {
         Screen::ListMusic => {
             if let Some(playlist_index) = app.tabs_playlist.selected() {
                 if let Some(song_index) = app.music_list.selected() {
+                    let sender = app.tx_playback.clone();
+                    let _ = sender.send(PlaybackEvent::DeleteTrack(song_index));
+
                     app.playlist.delete_song(playlist_index, song_index);
                 }
             }
