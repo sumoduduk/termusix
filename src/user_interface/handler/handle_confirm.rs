@@ -17,9 +17,11 @@ pub fn handle_y_key(app: &mut App) {
             if let Some(playlist_index) = app.tabs_playlist.selected() {
                 if let Some(song_index) = app.music_list.selected() {
                     let sender = app.tx_playback.clone();
-                    let _ = sender.send(PlaybackEvent::DeleteTrack(song_index));
+                    let res = sender.send(PlaybackEvent::DeleteTrack(song_index));
 
-                    app.playlist.delete_song(playlist_index, song_index);
+                    if res.is_ok() {
+                        app.playlist.delete_song(playlist_index, song_index);
+                    }
                 }
             }
         }
