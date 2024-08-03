@@ -1,4 +1,7 @@
-use crate::app::{screen::Screen, App};
+use crate::{
+    app::{screen::Screen, App},
+    playback::PlaybackEvent,
+};
 
 pub fn hande_left(app: &mut App) {
     match &app.screen_state {
@@ -8,7 +11,9 @@ pub fn hande_left(app: &mut App) {
         Screen::Playback => {
             app.button_prev();
         }
-        _ => {}
+        _ => {
+            app.seek_backward();
+        }
     }
 }
 
@@ -21,6 +26,8 @@ pub fn hande_right(app: &mut App) {
         Screen::Playback => {
             app.button_next();
         }
-        _ => {}
+        _ => {
+            app.seek_forward();
+        }
     }
 }
