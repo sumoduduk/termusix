@@ -29,7 +29,7 @@ pub struct VideoResult {
 }
 
 #[derive(Debug, Default)]
-struct NowPlayingData {
+pub struct NowPlayingData {
     playlist_id: Option<usize>,
     song_title: Option<String>,
 }
