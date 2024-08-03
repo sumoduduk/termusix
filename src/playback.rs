@@ -1,9 +1,10 @@
-use std::{collections::VecDeque, path::PathBuf};
+use std::{collections::VecDeque, path::PathBuf, time::Duration};
 
 use rodio::{OutputStream, Sink};
 use std::sync::mpsc::Receiver;
 
 use crate::{file_ops::decode_file, NowPlaying};
+use std::path::Path;
 
 pub enum PlaybackEvent {
     Playlist((usize, VecDeque<PathBuf>)),
@@ -12,6 +13,8 @@ pub enum PlaybackEvent {
     TrackPlay(usize),
     Forward,
     Backward,
+    SeekForward,
+    SeekBackward,
     DeleteTrack(usize),
     Quit,
 }
@@ -24,7 +27,6 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
 
         let mut playlist = VecDeque::new();
         let mut is_played = true;
-        let mut playlist_id = 0;
         let mut song_id = 0;
 
         while is_played {
@@ -32,10 +34,9 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
                 match evt {
                     PlaybackEvent::Playlist((pl_id, list)) => {
                         playlist = list;
-                        playlist_id = pl_id;
 
                         if let Ok(mut song_name) = now_playing.try_write() {
-                            song_name.playlist_id = Some(playlist_id);
+                            song_name.playlist_id = Some(pl_id);
                         }
 
                         sink.clear();
@@ -51,10 +52,7 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
                         playlist.push_back(id);
                     }
                     PlaybackEvent::TrackPlay(s_id) => {
-                        if song_id != s_id {
-                            song_id = s_id;
-                            sink.clear();
-                        }
+                        song_id = s_id;
                     }
                     PlaybackEvent::Quit => {
                         playlist.clear();
@@ -66,24 +64,31 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
                     }
                     PlaybackEvent::Backward => {
                         if !playlist.is_empty() {
-                            if let Some(id) = playlist.pop_back() {
-                                playlist.push_front(id);
+                            let curr = current_playing_index(song_id, playlist.len());
 
-                                if let Some(id_2) = playlist.pop_back() {
-                                    playlist.push_front(id_2);
-                                }
-
-                                sink.clear();
-                            }
+                            song_id = curr.saturating_sub(1);
+                            sink.clear();
                         }
                     }
 
                     PlaybackEvent::DeleteTrack(num) => {
-                        if song_id == num {
+                        if current_playing_index(song_id, playlist.len()) == num {
                             sink.clear();
                         }
 
                         playlist.remove(num);
+                    }
+                    PlaybackEvent::SeekForward => {
+                        if !sink.empty() {
+                            let dur = sink.get_pos();
+                            let _ = sink.try_seek(dur.saturating_add(Duration::from_secs(2)));
+                        }
+                    }
+                    PlaybackEvent::SeekBackward => {
+                        if !sink.empty() {
+                            let dur = sink.get_pos();
+                            let _ = sink.try_seek(dur.saturating_sub(Duration::from_secs(5)));
+                        }
                     } // _ => {}
                 }
             }
@@ -91,7 +96,7 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
             if sink.empty() {
                 if let Some(music_file) = playlist.get(song_id) {
                     if let Ok(mut song_name) = now_playing.try_write() {
-                        song_name.song_title = music_file.to_str().map(|s| s.to_owned());
+                        song_name.song_title = extract_id(music_file).map(|s| s.to_owned());
                     }
 
                     match decode_file(music_file) {
@@ -102,7 +107,7 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
                         Err(_) => {}
                     }
 
-                    if song_id > playlist.len() - 1 {
+                    if song_id >= playlist.len() - 1 {
                         song_id = 0;
                     } else {
                         song_id += 1;
@@ -114,14 +119,21 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
     });
 }
 
+fn current_playing_index(song_id: usize, len: usize) -> usize {
+    match song_id {
+        0 => len.saturating_sub(1),
+        _ => song_id.saturating_sub(1),
+    }
+}
+
+fn extract_id(file_name: &Path) -> Option<&str> {
+    let os_name = file_name.file_stem().and_then(|s| s.to_str());
+    os_name.to_owned()
+}
+
 #[cfg(test)]
 mod tests {
-    use std::path::Path;
-
-    fn extract_id(file_name: &Path) -> Option<String> {
-        let os_name = file_name.file_stem().map(|s| s.to_str())??;
-        Some(os_name.to_owned())
-    }
+    use super::*;
 
     #[test]
     fn test_steming_1() {
