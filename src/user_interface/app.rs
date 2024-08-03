@@ -132,12 +132,7 @@ impl App {
 
     pub fn get_now_playing(&self) -> Option<String> {
         let id = if let Ok(ids) = self.now_playing.read() {
-            let name_id = ids.as_ref()?;
-
-            let selected = self.tabs_playlist.selected();
-            let list = self.playlist.list_music_by_idx(selected)?;
-            let name_song = list.get_key_value(name_id)?;
-            Some(name_song.1.to_owned())
+            ids.song_title.clone()
         } else {
             None
         };
