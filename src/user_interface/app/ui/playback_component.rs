@@ -2,7 +2,7 @@ use ratatui::{
     buffer::Buffer,
     layout::{Alignment, Constraint, Flex, Layout, Rect},
     text::Text,
-    widgets::{block::Title, Block, BorderType, Borders, Padding, Paragraph, Widget},
+    widgets::{block::Title, Block, BorderType, Borders, Padding, Paragraph, Widget, Wrap},
 };
 
 use crate::app::{App, Screen};
@@ -34,7 +34,18 @@ pub fn render_playback(app: &App, area: Rect, buf: &mut Buffer) {
 fn display_now_playing(song_name: Option<String>, area: Rect, buf: &mut Buffer) {
     let song_name = song_name.unwrap_or_default();
 
+    let block = Block::new().padding(Padding {
+        left: 2,
+        right: 2,
+        top: 0,
+        bottom: 0,
+    });
+
     let text = Text::from(song_name).alignment(Alignment::Center);
 
-    Paragraph::new(text).centered().render(area, buf);
+    Paragraph::new(text)
+        .centered()
+        .block(block)
+        .wrap(Wrap { trim: true })
+        .render(area, buf);
 }
