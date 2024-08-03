@@ -2,7 +2,6 @@ use ratatui::{
     buffer::Buffer,
     layout::Rect,
     style::{palette::tailwind, Color, Stylize},
-    symbols::block,
     text::Line,
     widgets::{Block, Padding, Tabs, Widget},
 };
@@ -11,7 +10,7 @@ use strum::{Display, EnumIter, FromRepr, IntoEnumIterator};
 #[derive(Debug, Default, Clone, Copy, Display, FromRepr, EnumIter)]
 pub enum SelectedButton {
     #[strum(to_string = "|◄◄")]
-    Prevous,
+    Previous,
     #[strum(to_string = "◄◄")]
     Rewind,
     #[default]
