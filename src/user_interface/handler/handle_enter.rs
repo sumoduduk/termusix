@@ -28,6 +28,24 @@ pub async fn enter_key(app: &mut App) {
                 }
             }
         }
+
+        Screen::Playback => match app.playback_button {
+            SelectedButton::Previous => {
+                app.prev_music();
+            }
+            SelectedButton::Rewind => {
+                app.seek_backward();
+            }
+            SelectedButton::Play => {
+                app.pause_toggle();
+            }
+            SelectedButton::Forward => {
+                app.seek_forward();
+            }
+            SelectedButton::Next => {
+                app.next_music();
+            }
+        },
         _ => {}
     }
 }
