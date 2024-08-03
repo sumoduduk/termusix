@@ -1,7 +1,4 @@
-use std::{
-    collections::VecDeque,
-    path::{Path, PathBuf},
-};
+use std::{collections::VecDeque, path::PathBuf};
 
 use rodio::{OutputStream, Sink};
 use std::sync::mpsc::Receiver;
@@ -9,12 +6,13 @@ use std::sync::mpsc::Receiver;
 use crate::{file_ops::decode_file, NowPlaying};
 
 pub enum PlaybackEvent {
-    Playlist(VecDeque<PathBuf>),
+    Playlist((usize, VecDeque<PathBuf>)),
     PauseToggle,
     Add(PathBuf),
-    TrackPlay((usize, usize)),
+    TrackPlay(usize),
     Forward,
     Backward,
+    DeleteTrack(usize),
     Quit,
 }
 
@@ -32,8 +30,14 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
         while is_played {
             if let Ok(evt) = rx.try_recv() {
                 match evt {
-                    PlaybackEvent::Playlist(list) => {
+                    PlaybackEvent::Playlist((pl_id, list)) => {
                         playlist = list;
+                        playlist_id = pl_id;
+
+                        if let Ok(mut song_name) = now_playing.try_write() {
+                            song_name.playlist_id = Some(playlist_id);
+                        }
+
                         sink.clear();
                     }
                     PlaybackEvent::PauseToggle => {
@@ -46,15 +50,10 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
                     PlaybackEvent::Add(id) => {
                         playlist.push_back(id);
                     }
-                    PlaybackEvent::TrackPlay((p_id, s_id)) => {
-                        if playlist_id != p_id {
-                            playlist.clear();
-                            playlist_id = p_id;
-                        }
-
+                    PlaybackEvent::TrackPlay(s_id) => {
                         if song_id != s_id {
-                            sink.clear();
                             song_id = s_id;
+                            sink.clear();
                         }
                     }
                     PlaybackEvent::Quit => {
@@ -77,6 +76,14 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
                                 sink.clear();
                             }
                         }
+                    }
+
+                    PlaybackEvent::DeleteTrack(num) => {
+                        if song_id == num {
+                            sink.clear();
+                        }
+
+                        playlist.remove(num);
                     } // _ => {}
                 }
             }
@@ -84,7 +91,7 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
             if sink.empty() {
                 if let Some(music_file) = playlist.get(song_id) {
                     if let Ok(mut song_name) = now_playing.try_write() {
-                        *song_name = music_file.to_str().map(|s| s.to_owned());
+                        song_name.song_title = music_file.to_str().map(|s| s.to_owned());
                     }
 
                     match decode_file(music_file) {
@@ -92,7 +99,7 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
                             sink.append(decoded);
                             sink.play();
                         }
-                        Err(err) => println!("{err}"),
+                        Err(_) => {}
                     }
 
                     if song_id > playlist.len() - 1 {
@@ -107,14 +114,14 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
     });
 }
 
-fn extract_id(file_name: &Path) -> Option<String> {
-    let os_name = file_name.file_stem().map(|s| s.to_str())??;
-    Some(os_name.to_owned())
-}
-
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use std::path::Path;
+
+    fn extract_id(file_name: &Path) -> Option<String> {
+        let os_name = file_name.file_stem().map(|s| s.to_str())??;
+        Some(os_name.to_owned())
+    }
 
     #[test]
     fn test_steming_1() {
