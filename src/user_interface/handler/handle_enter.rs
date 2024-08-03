@@ -1,4 +1,9 @@
-use crate::{app::{screen::Screen, App}, playback::PlaybackEvent};
+use crate::{
+    app::{screen::Screen, widget_playback_buttons::SelectedButton, App},
+    playback::PlaybackEvent,
+};
+
+use super::play::play_and_download;
 
 pub async fn enter_key(app: &mut App) {
     match app.screen_state {
@@ -15,16 +20,22 @@ pub async fn enter_key(app: &mut App) {
             };
 
             let sender = app.tx_playback.clone();
-            let _ = sender.send(PlaybackEvent::TrackPlay())
+            let _ = sender.send(PlaybackEvent::TrackPlay(song_id));
 
-            if let Ok(now_playing) = app.now_playing.read() {
-                match now_playing.playlist_id {
-                    Some(id) => {
-                        if let Some(index) = app.tabs_playlist.selected() {
-                            if id != index {}
+            let sender2 = app.tx_playback.clone();
+
+            match app.get_now_playing_id() {
+                Some(id) => {
+                    if let Some(index) = app.tabs_playlist.selected() {
+                        if id != index {
+                            play_and_download(app).await;
+                        } else {
+                            let _ = sender2.send(PlaybackEvent::Forward);
                         }
                     }
-                    None => todo!(),
+                }
+                None => {
+                    play_and_download(app).await;
                 }
             }
         }
