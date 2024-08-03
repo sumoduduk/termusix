@@ -209,6 +209,16 @@ impl App {
             None
         }
     }
+
+    pub fn seek_forward(&self) {
+        let sender = self.tx_playback.clone();
+        let _ = sender.send(PlaybackEvent::SeekForward);
+    }
+
+    pub fn seek_backward(&self) {
+        let sender = self.tx_playback.clone();
+        let _ = sender.send(PlaybackEvent::SeekBackward);
+    }
 }
 
 impl StatefulWidget for &mut App {
