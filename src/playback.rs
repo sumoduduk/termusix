@@ -79,7 +79,11 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
                     }
 
                     PlaybackEvent::DeleteTrack(num) => {
-                        if current_playing_index(song_id, playlist.len()) == num {
+                        let curr = current_playing_index(song_id, playlist.len());
+                        if curr == num {
+                            if song_id != 0 {
+                                song_id = num;
+                            }
                             sink.clear();
                         }
 
