@@ -4,6 +4,7 @@ use eyre::OptionExt;
 use indexmap::IndexMap;
 use std::fs::OpenOptions;
 use std::io::Write;
+use std::path::Path;
 
 const URL: &str = "https://inv.tux.pizza/api/v1/playlists";
 
@@ -56,6 +57,7 @@ fn map_music_info(videos: &[VideoResult]) -> MusicInfo {
 }
 
 pub fn save_file_json(playlist: &MusicPlaylist) -> eyre::Result<()> {
+pub fn save_file_json(playlist: &MusicPlaylist, path: &Path) -> eyre::Result<()> {
     let json_str = serde_json::to_string_pretty(&playlist)?;
 
     let mut file = OpenOptions::new()
@@ -63,6 +65,7 @@ pub fn save_file_json(playlist: &MusicPlaylist) -> eyre::Result<()> {
         .create(true)
         .truncate(true)
         .open("music.json")?;
+        .open(path)?;
 
     file.write_all(json_str.as_bytes())?;
 
