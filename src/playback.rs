@@ -100,6 +100,16 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
                             let dur = sink.get_pos();
                             let _ = sink.try_seek(dur.saturating_sub(Duration::from_secs(5)));
                         }
+                    }
+                    PlaybackEvent::SetVolume(vol) => sink.set_volume(vol),
+                    PlaybackEvent::Mute(vol) => {
+                        let curr_vol = sink.volume();
+
+                        if curr_vol == 0.0 {
+                            sink.set_volume(vol)
+                        } else {
+                            sink.set_volume(0.0)
+                        }
                     } // _ => {}
                 }
             }
@@ -118,10 +128,12 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
                         Err(_) => {}
                     }
 
-                    if song_id >= playlist.len() - 1 {
+                    let total = song_id + 1;
+
+                    if total > playlist.len() - 1 {
                         song_id = 0;
                     } else {
-                        song_id += 1;
+                        song_id = total;
                     }
                 }
             }
