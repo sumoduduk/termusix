@@ -1,9 +1,7 @@
 use ratatui::{
     buffer::Buffer,
     layout::{Alignment, Rect},
-    widgets::{
-        block::Title, Block, BorderType, Borders, HighlightSpacing, List, Padding, StatefulWidget,
-    },
+    widgets::{Block, BorderType, Borders, HighlightSpacing, List, Padding, StatefulWidget},
 };
 
 use crate::app::{screen::Screen, App};
@@ -15,7 +13,7 @@ pub fn render_playlist(app: &mut App, playlist_layout: Rect, buf: &mut Buffer) {
 
     let playlist_block = Block::new()
         .title("Playlist")
-        .title(Title::from(title_right).alignment(Alignment::Right))
+        .title_bottom(title_right)
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
         .padding(Padding::new(0, 0, 1, 1))
