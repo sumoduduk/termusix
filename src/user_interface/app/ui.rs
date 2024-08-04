@@ -32,8 +32,8 @@ pub fn render(app: &mut App, area: Rect, buf: &mut Buffer, app_state: &mut AppSt
     let horizontal_screen = Layout::horizontal([Percentage(35), Percentage(65)]);
     let [main_layout, music_list_layout] = horizontal_screen.areas(main_layout);
 
-    let main_frame = Layout::vertical([Percentage(50), Percentage(50)]);
-    let [playback_layout, playlist_layout] = main_frame.areas(main_layout);
+    let main_frame = Layout::vertical([Percentage(35), Min(3), Percentage(65)]);
+    let [playback_layout, volume_layout, playlist_layout] = main_frame.areas(main_layout);
 
     render_playback(app, playback_layout, buf);
     Volume::new(app.volume).render(volume_layout, buf);
