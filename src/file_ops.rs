@@ -31,7 +31,9 @@ pub fn decode_file(path: &Path) -> eyre::Result<Decoder<File>> {
         let decoder = match extract_extentions(path) {
             Some("mp4") => rodio::Decoder::new_mp4(file, rodio::decoder::Mp4Type::M4a)
                 .wrap_err("cant decode file"),
-            Some("mp3") => rodio::Decoder::new(file).wrap_err("cant decode file"),
+            Some("mp3") | Some("flac") | Some("wav") | Some("ogg") => {
+                rodio::Decoder::new(file).wrap_err("cant decode file")
+            }
             _ => Err(eyre!("ERROR: not mp3 and mp4 file")),
         };
 
