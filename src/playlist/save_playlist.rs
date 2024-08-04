@@ -194,7 +194,7 @@ mod tests {
 
         music_playlist.insert(playlist_id.to_owned(), info_music);
 
-        save_file_json(&music_playlist)?;
+        save_file_json(&music_playlist, Path::new("music.json"))?;
 
         let file_string = std::fs::read_to_string("music.json")?;
 
