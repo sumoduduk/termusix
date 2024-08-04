@@ -16,6 +16,8 @@ pub enum PlaybackEvent {
     SeekForward,
     SeekBackward,
     DeleteTrack(usize),
+    SetVolume(f32),
+    Mute(f32),
     Quit,
 }
 
