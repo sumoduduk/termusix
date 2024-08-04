@@ -3,6 +3,7 @@ mod music_list_components;
 mod playback_component;
 mod playlist_components;
 mod pop_up;
+mod volume_component;
 
 use footer_components::render_footer;
 use music_list_components::render_music_list;
@@ -13,7 +14,9 @@ use ratatui::{
     buffer::Buffer,
     layout::{Constraint, Layout, Rect},
     style::{palette::tailwind::SLATE, Modifier, Style},
+    widgets::Widget,
 };
+use volume_component::Volume;
 
 use crate::user_interface::cursor::AppState;
 
@@ -33,6 +36,7 @@ pub fn render(app: &mut App, area: Rect, buf: &mut Buffer, app_state: &mut AppSt
     let [playback_layout, playlist_layout] = main_frame.areas(main_layout);
 
     render_playback(app, playback_layout, buf);
+    Volume::new(app.volume).render(volume_layout, buf);
     render_playlist(app, playlist_layout, buf);
     render_music_list(app, music_list_layout, buf);
     render_footer(app, footer_layout, buf);
