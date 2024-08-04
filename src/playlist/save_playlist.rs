@@ -56,7 +56,6 @@ fn map_music_info(videos: &[VideoResult]) -> MusicInfo {
     music_list
 }
 
-pub fn save_file_json(playlist: &MusicPlaylist) -> eyre::Result<()> {
 pub fn save_file_json(playlist: &MusicPlaylist, path: &Path) -> eyre::Result<()> {
     let json_str = serde_json::to_string_pretty(&playlist)?;
 
@@ -64,7 +63,6 @@ pub fn save_file_json(playlist: &MusicPlaylist, path: &Path) -> eyre::Result<()>
         .write(true)
         .create(true)
         .truncate(true)
-        .open("music.json")?;
         .open(path)?;
 
     file.write_all(json_str.as_bytes())?;
