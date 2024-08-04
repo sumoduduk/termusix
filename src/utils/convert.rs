@@ -2,7 +2,7 @@ use std::path::Path;
 use std::process::Output;
 
 use eyre::OptionExt;
-use tokio::fs::{self, read_dir};
+use tokio::fs::read_dir;
 use tokio::process::Command;
 
 use crate::file_ops::{extract_extentions, get_parent};
@@ -15,7 +15,7 @@ pub async fn convert_folder() -> eyre::Result<()> {
     while let Some(entry) = entries.next_entry().await? {
         let path_buf = entry.path();
         let ext = extract_extentions(&path_buf).ok_or_eyre("cant get extenstion")?;
-        if ext == "mp4" {
+        if ext == "mp4" || ext == "webm" {
             let res = convert_codec(&path_buf).await;
 
             let path_display = &path_buf.display();
@@ -64,7 +64,7 @@ async fn convert_codec(mp4_path: &Path) -> eyre::Result<Output> {
         .output()
         .await?;
 
-    fs::remove_file(in_file).await.unwrap();
+    // fs::remove_file(in_file).await.unwrap();
 
     Ok(output)
 }
