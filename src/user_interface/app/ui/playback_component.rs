@@ -2,7 +2,7 @@ use ratatui::{
     buffer::Buffer,
     layout::{Alignment, Constraint, Flex, Layout, Rect},
     text::Text,
-    widgets::{block::Title, Block, BorderType, Borders, Padding, Paragraph, Widget, Wrap},
+    widgets::{Block, BorderType, Borders, Padding, Paragraph, Widget, Wrap},
 };
 
 use crate::app::{App, Screen};
@@ -11,7 +11,7 @@ pub fn render_playback(app: &App, area: Rect, buf: &mut Buffer) {
     let title_right = app.render_title_right(Screen::Playback).unwrap_or_default();
     let playback_block = Block::new()
         .title("Now Playing")
-        .title(Title::from(title_right).alignment(Alignment::Right))
+        .title_bottom(title_right)
         .borders(Borders::ALL)
         .padding(Padding::new(0, 0, area.height / 4, 0))
         .border_type(BorderType::Rounded)
