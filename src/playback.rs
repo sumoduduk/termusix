@@ -66,9 +66,14 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
                     }
                     PlaybackEvent::Backward => {
                         if !playlist.is_empty() {
-                            let curr = current_playing_index(song_id, playlist.len());
+                            let len = playlist.len();
+                            let curr = current_playing_index(song_id, len);
 
-                            song_id = curr.saturating_sub(1);
+                            if song_id == 0 {
+                                song_id = len - 1;
+                            } else {
+                                song_id = curr.saturating_sub(1);
+                            }
                             sink.clear();
                         }
                     }
