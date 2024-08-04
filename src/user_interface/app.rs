@@ -46,6 +46,8 @@ pub struct App {
     pub list_to_add: Vec<PathBuf>,
     pub pop_up_confirm: bool,
     pub playback_button: SelectedButton,
+    pub volume: f32,
+    pub is_mute: bool,
 }
 
 // impl Default for App {
@@ -77,6 +79,8 @@ impl App {
             list_to_add: Vec::default(),
             pop_up_confirm: false,
             playback_button: SelectedButton::default(),
+            volume: 1.0,
+            is_mute: false,
         }
     }
 
@@ -144,7 +148,7 @@ impl App {
         let extention = path.extension().and_then(|os_str| os_str.to_str());
 
         if let Some(ext) = extention {
-            if ext == "mp4" || ext == "mp3" {
+            if ext == "flac" || ext == "mp3" || ext == "wav" || ext == "ogg" {
                 self.list_to_add.push(path.into())
             }
         }
@@ -211,7 +215,7 @@ impl App {
 
     fn render_title_right_inner(&self) -> Option<String> {
         match self.screen_state {
-            Screen::Playback => Some("Press ← or → to scroll button playback".to_owned()),
+            Screen::Playback => Some("← → to scroll | + - for volume ".to_owned()),
             Screen::Playlist => Some("Press A to add playlist".to_owned()),
             Screen::ListMusic => Some("Press A to add song".to_owned()),
             _ => None,
@@ -234,6 +238,31 @@ impl App {
     pub fn seek_backward(&self) {
         let sender = self.tx_playback.clone();
         let _ = sender.send(PlaybackEvent::SeekBackward);
+    }
+
+    pub fn increase_volume(&mut self) {
+        let total = self.volume.saturating_add(0.1);
+
+        if total > 2.0 {
+            self.volume = 2.0;
+        } else {
+            self.volume = total;
+        }
+    }
+
+    pub fn decrease_volume(&mut self) {
+        let total = self.volume.saturating_add(-0.1);
+
+        if total < 0.0 {
+            self.volume = 0.0;
+        } else {
+            self.volume = total;
+        }
+    }
+
+    pub fn mute_toggle(&self) {
+        let sender = self.tx_playback.clone();
+        let _ = sender.send(PlaybackEvent::Mute(self.volume));
     }
 }
 
