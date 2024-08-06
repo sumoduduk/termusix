@@ -5,6 +5,7 @@ use ratatui::{
     style::Style,
     widgets::{ListState, StatefulWidget},
 };
+use rodio::Sample;
 use screen::{get_border_color, Screen};
 use std::{path::PathBuf, sync::mpsc::Sender};
 use tui_input::Input;
