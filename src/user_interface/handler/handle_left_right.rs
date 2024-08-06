@@ -1,7 +1,4 @@
-use crate::{
-    app::{screen::Screen, App},
-    playback::PlaybackEvent,
-};
+use crate::app::{screen::Screen, App};
 
 pub fn hande_left(app: &mut App) {
     match &app.screen_state {
