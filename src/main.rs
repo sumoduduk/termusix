@@ -91,8 +91,6 @@ async fn main() -> eyre::Result<()> {
                         handle_key_events(key_event, &mut app).await?;
                     }
                 },
-                Event::Mouse(_) => {}
-                Event::Resize(_, _) => {}
             }
         }
 
