@@ -68,6 +68,9 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<
         KeyCode::Enter => enter_key(app).await,
         KeyCode::Char('a') => handle_a(app),
         KeyCode::Char('d') => handle_delete_key(app),
+        KeyCode::Char('r') => {
+            app.mode_next();
+        }
         KeyCode::Char('m') => {
             app.mute_toggle();
         }
