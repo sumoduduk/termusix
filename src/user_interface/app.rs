@@ -7,6 +7,7 @@ use ratatui::{
 };
 use rodio::Sample;
 use screen::{get_border_color, Screen};
+use state_play::StatePlay;
 use std::{path::PathBuf, sync::mpsc::Sender};
 use tui_input::Input;
 use widget_playback_buttons::SelectedButton;
@@ -22,6 +23,7 @@ use super::cursor::AppState;
 
 mod cwd_dirs;
 pub mod screen;
+pub mod state_play;
 mod ui;
 pub mod widget_list_add;
 pub mod widget_playback_buttons;
@@ -36,6 +38,7 @@ pub type AppResult<T> = eyre::Result<T>;
 pub struct App {
     /// Is the application running?
     pub running: bool,
+    pub state_play: StatePlay,
     pub music_list: ListState,
     pub screen_state: Screen,
     pub playlist: Playlist,
@@ -69,6 +72,7 @@ impl App {
 
         Self {
             running: true,
+            state_play: StatePlay::Normal,
             music_list: ListState::default(),
             screen_state: Screen::default(),
             playlist,
@@ -212,6 +216,14 @@ impl App {
 
     pub fn button_prev(&mut self) {
         self.playback_button = self.playback_button.previous();
+    }
+
+    pub fn mode_next(&mut self) {
+        let state = self.state_play.next();
+        self.state_play = state;
+
+        let sender = self.tx_playback.clone();
+        let _ = sender.send(PlaybackEvent::State(state));
     }
 
     fn render_title_right_inner(&self) -> Option<String> {
