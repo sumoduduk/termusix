@@ -14,10 +14,10 @@ pub enum Event {
     Tick,
     /// Key press.
     Key(KeyEvent),
-    /// Mouse click/scroll.
-    Mouse(MouseEvent),
-    /// Terminal resize.
-    Resize(u16, u16),
+    // Mouse click/scroll.
+    // Mouse(MouseEvent),
+    // Terminal resize.
+    // Resize(u16, u16),
 }
 
 /// Terminal event handler.
