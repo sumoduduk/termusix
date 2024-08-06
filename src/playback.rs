@@ -143,6 +143,26 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
     });
 }
 
+fn state_play_fn(song_id: &mut usize, len: usize, state_play: &StatePlay) {
+    match state_play {
+        StatePlay::Normal => {
+            let total = *song_id + 1;
+
+            if total > len - 1 {
+                *song_id = 0;
+            } else {
+                *song_id = total;
+            }
+        }
+        StatePlay::RepeatOne => {}
+        StatePlay::Random => {
+            let rand = get_random_number(len);
+
+            *song_id = rand;
+        }
+    }
+}
+
 fn current_playing_index(song_id: usize, len: usize) -> usize {
     match song_id {
         0 => len.saturating_sub(1),
