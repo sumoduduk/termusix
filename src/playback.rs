@@ -17,6 +17,7 @@ pub enum PlaybackEvent {
     Backward,
     SeekForward,
     SeekBackward,
+    State(StatePlay),
     DeleteTrack(usize),
     SetVolume(f32),
     Mute(f32),
@@ -32,6 +33,7 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
         let mut playlist = VecDeque::new();
         let mut is_played = true;
         let mut song_id = 0;
+        let mut state_play = StatePlay::Normal;
 
         while is_played {
             if let Ok(evt) = rx.try_recv() {
