@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use crossterm::event::{Event as CrosstermEvent, KeyEvent, MouseEvent};
+use crossterm::event::{Event as CrosstermEvent, KeyEvent};
 use eyre::OptionExt;
 use futures::{FutureExt, StreamExt};
 use tokio::sync::mpsc;
