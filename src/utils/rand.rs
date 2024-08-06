@@ -1,36 +1,40 @@
-pub struct XorShiftRng {
-    x: u32,
-    y: u32,
-    z: u32,
-    w: u32,
+use std::time::{SystemTime, UNIX_EPOCH};
+
+pub fn get_random_number(max_number: usize) -> usize {
+    // Get the current system time in nanoseconds since the UNIX epoch
+    let mut seed = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("Time went backwards")
+        .as_nanos() as u64;
+
+    // Use the nanoseconds value as a seed and generate a pseudo-random number
+    seed = (seed ^ (seed >> 33)).wrapping_mul(0xff51afd7ed558ccd);
+    seed = (seed ^ (seed >> 33)).wrapping_mul(0xc4ceb9fe1a85ec53);
+    seed = seed ^ (seed >> 33);
+
+    // Modulo operation to get a value between 0 and max_number - 1
+    (seed % max_number as u64) as usize
 }
 
-impl XorShiftRng {
-    pub fn new(seed: u64) -> XorShiftRng {
-        let x = seed as u32;
-        let y = (seed >> 32) as u32;
-        let z = x ^ y;
-        let w = y.wrapping_add(1);
-        XorShiftRng { x, y, z, w }
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_rand_1() {
+        let max_n = 40;
+        let rn = get_random_number(max_n);
+        dbg!(rn);
+
+        assert!(rn < max_n);
     }
 
-    pub fn gen_range(&mut self, range: std::ops::RangeInclusive<u32>) -> u32 {
-        let (start, end) = range.into_inner();
-        self.gen_range_start_end(start, end)
-    }
+    #[test]
+    fn test_rand_2() {
+        let max_n = 231;
+        let rn = get_random_number(max_n);
+        dbg!(rn);
 
-    fn gen_range_start_end(&mut self, start: u32, end: u32) -> u32 {
-        assert!(start <= end, "Invalid range");
-        let range = end - start;
-        start + self.gen_u32() % (range + 1)
-    }
-
-    fn gen_u32(&mut self) -> u32 {
-        let t = self.x ^ (self.x << 11);
-        self.x = self.y;
-        self.y = self.z;
-        self.z = self.w;
-        self.w = self.w ^ (self.w >> 19) ^ (t ^ (t >> 8));
-        self.w
+        assert!(rn < max_n);
     }
 }
