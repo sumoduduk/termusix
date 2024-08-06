@@ -114,6 +114,9 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
                         } else {
                             sink.set_volume(0.0)
                         }
+                    }
+                    PlaybackEvent::State(state) => {
+                        state_play = state;
                     } // _ => {}
                 }
             }
@@ -132,13 +135,7 @@ pub fn start_playing(rx: Receiver<PlaybackEvent>, now_playing: NowPlaying) {
                         Err(_) => {}
                     }
 
-                    let total = song_id + 1;
-
-                    if total > playlist.len() - 1 {
-                        song_id = 0;
-                    } else {
-                        song_id = total;
-                    }
+                    state_play_fn(&mut song_id, playlist.len(), &state_play)
                 }
             }
             std::thread::sleep(std::time::Duration::from_millis(2000));
