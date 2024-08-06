@@ -34,7 +34,7 @@ pub fn decode_file(path: &Path) -> eyre::Result<Decoder<File>> {
             Some("mp3") | Some("flac") | Some("wav") | Some("ogg") => {
                 rodio::Decoder::new(file).wrap_err("cant decode file")
             }
-            _ => Err(eyre!("ERROR: not mp3 and mp4 file")),
+            _ => Err(eyre!("ERROR: not sound codec")),
         };
 
         decoder
