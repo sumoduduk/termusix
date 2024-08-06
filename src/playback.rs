@@ -3,7 +3,9 @@ use std::{collections::VecDeque, path::PathBuf, time::Duration};
 use rodio::{OutputStream, Sink};
 use std::sync::mpsc::Receiver;
 
-use crate::{file_ops::decode_file, NowPlaying};
+use crate::{
+    app::state_play::StatePlay, file_ops::decode_file, utils::rand::get_random_number, NowPlaying,
+};
 use std::path::Path;
 
 pub enum PlaybackEvent {
