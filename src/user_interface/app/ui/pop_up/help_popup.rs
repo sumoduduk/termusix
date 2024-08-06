@@ -25,6 +25,8 @@ pub fn render_help(_app: &App, area: Rect, buf: &mut Buffer) {
         "",
         "? : Go to help screen",
         "",
+        "+/- : Volume Control",
+        "",
         "Space : Toggle Play/Pause",
         "",
         "A : Add playlist when on playlist screen / add song when on music list screen",
@@ -32,6 +34,8 @@ pub fn render_help(_app: &App, area: Rect, buf: &mut Buffer) {
         "J : Scroll down",
         "",
         "K : Scroll up",
+        "",
+        "R : Switch Mode",
     ];
 
     let line_msg = msg_help.map(Line::from);
