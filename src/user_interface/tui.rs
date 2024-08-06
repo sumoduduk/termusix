@@ -4,7 +4,6 @@ use ratatui::backend::Backend;
 use ratatui::crossterm::event::{DisableMouseCapture, EnableMouseCapture};
 use ratatui::crossterm::terminal::{self, EnterAlternateScreen, LeaveAlternateScreen};
 use ratatui::layout::{Constraint, Layout};
-use ratatui::widgets::Clear;
 use ratatui::Terminal;
 use std::io;
 use std::panic;
