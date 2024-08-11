@@ -134,7 +134,7 @@ impl Playlist {
     pub fn get_playlist_id(&self, index: Option<usize>) -> Option<&str> {
         let (pl_id, _) = self.0.get_index(index?)?;
 
-        Some(&pl_id)
+        Some(pl_id)
     }
 
     pub fn get_music_title(
