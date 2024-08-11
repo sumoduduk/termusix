@@ -5,7 +5,7 @@ use crate::{app::App, file_ops::send_id_file_exist, playback::PlaybackEvent};
 pub async fn play_and_download(app: &App) {
     let indx = app.tabs_playlist.selected();
 
-    let Some(title) = app.playlist.get_playlist_tittle(indx) else {
+    let Some(pl_id) = app.playlist.get_playlist_id(indx) else {
         return;
     };
 
@@ -15,7 +15,7 @@ pub async fn play_and_download(app: &App) {
 
     let sender = app.tx_playback.clone();
 
-    if title.contains("local") {
+    if pl_id.contains("local") {
         let song_paths: VecDeque<PathBuf> = pl
             .iter()
             .map(PathBuf::from)
@@ -40,26 +40,4 @@ pub async fn play_and_download(app: &App) {
             });
         }
     }
-
-    // if let Some((list, len)) = app.list_id_downloaded_first(indx) {
-    //     tokio::spawn(async move {
-    //         let downloaded: VecDeque<String> = list[..len]
-    //             .to_vec()
-    //             .iter()
-    //             .map(|id| concat_file(id))
-    //             .collect();
-    //
-    //         if !downloaded.is_empty() {
-    //             let _ = send.send(PlaybackEvent::Playlist(downloaded));
-    //         }
-    //         let not_downloaded = &list[len..].to_vec();
-    //         for id in not_downloaded {
-    //             let res = download_music(id).await;
-    //             if res.is_ok() {
-    //                 let _ = send.send(PlaybackEvent::Add(concat_file(id)));
-    //                 time::sleep(Duration::from_secs(30)).await;
-    //             }
-    //         }
-    //     });
-    // }
 }
