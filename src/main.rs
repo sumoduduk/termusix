@@ -57,6 +57,10 @@ async fn main() -> eyre::Result<()> {
                 convert_folder().await?;
             }
 
+            "--version" | "-V" => {
+                println!("termusix v0.1.0");
+            }
+
             _ => {
                 println!("INFO: use argument --convert to convert file folder");
             }
