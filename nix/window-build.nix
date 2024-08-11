@@ -40,7 +40,20 @@
     depsBuildBuild = with pkgs; [
       pkgsCross.mingwW64.stdenv.cc
       pkgsCross.mingwW64.windows.pthreads
+      # pkgsCross.mingwW64.windows.windows_sdk
     ];
+
+    # buildInputs = with pkgs; [
+    # pkgsCross.mingwW64.windows.advapi32
+    # pkgsCross.mingwW64.windows.shell32
+    # pkgsCross.mingwW64.windows.user32
+    # pkgsCross.mingwW64.windows.kernel32
+    # pkgsCross.mingwW64.windows.gdi32
+    # pkgsCross.mingwW64.windows.comdlg32
+    # pkgsCross.mingwW64.windows.comctl32
+    # pkgsCross.mingwW64.windows.ws2_32
+    # pkgsCross.mingwW64.windows.winmm # For audio playback
+    # ];
   };
 
   cargoArtifacts = craneLib.buildDepsOnly commonArgs;
