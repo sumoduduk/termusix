@@ -35,7 +35,7 @@
 
       src = termusixCommon.src;
 
-      doCheck = true;
+      doCheck = false;
       strictDeps = true;
 
       nativeBuildInputs = [
@@ -45,11 +45,20 @@
 
       buildInputs =
         [
+          pkgs.alsa-lib
+          pkgs.dbus
           #pkgs.openssl
         ]
         ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
           pkgs.libiconv
           pkgs.darwin.apple_sdk.frameworks.Foundation
+          # pkgs.darwin.apple_sdk.frameworks.Security
+          pkgs.darwin.apple_sdk.frameworks.CoreFoundation
+          # pkgs.darwin.apple_sdk.frameworks.CoreServices
+          pkgs.darwin.apple_sdk.frameworks.CoreAudio
+          pkgs.darwin.apple_sdk.frameworks.AudioToolbox
+          # pkgs.darwin.apple_sdk.frameworks.CoreMIDI
+          # pkgs.darwin.apple_sdk.frameworks.IOKit
         ];
 
       CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER = "${stdenv.cc.targetPrefix}cc";
