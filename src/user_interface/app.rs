@@ -196,7 +196,7 @@ impl App {
         match self.screen_state {
             Screen::Playlist => self
                 .playlist
-                .get_playlist_tittle(index_playlist)
+                .get_playlist_title(index_playlist)
                 .map(|s| ("Delete Playlist", [msg, s, "?"].concat())),
 
             Screen::ListMusic => {
