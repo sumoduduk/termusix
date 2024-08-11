@@ -1,6 +1,5 @@
 {
   description = "Build termusix app with flake.nix";
-
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
@@ -9,72 +8,114 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+      };
+    };
+
+    fenix = {
+      url = "github:nix-community/fenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = {
+  outputs = inputs @ {
     self,
     nixpkgs,
     crane,
     flake-utils,
+    rust-overlay,
     ...
   }:
-    flake-utils.lib.eachDefaultSystem (system: let
-      pkgs = nixpkgs.legacyPackages.${system};
+    flake-utils.lib.eachDefaultSystem (localSystem: {
+      packages = let
+        pkgs = nixpkgs.legacyPackages.${localSystem};
 
-      craneLib = crane.mkLib pkgs;
+        definetermusixPkgs = {}:
+          {
+            termusix_aarch64-linux = import ./nix/cross-build.nix {
+              inherit localSystem inputs;
+              pathCwd = ./.;
+              crossSystem = "aarch64-linux";
+              rustTargetTriple = "aarch64-unknown-linux-gnu";
+            };
 
-      commonArgs = {
-        src = craneLib.cleanCargoSource ./.;
-        strictDeps = true;
+            termusix_x86_64-linux = import ./nix/cross-build.nix {
+              inherit localSystem inputs;
+              pathCwd = ./.;
+              crossSystem = "x86_64-linux";
+              rustTargetTriple = "x86_64-unknown-linux-gnu";
+            };
 
-        buildInputs =
-          [
-            # pkgs.openssl
-            pkgs.alsa-lib
-            pkgs.dbus
-          ]
-          ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
-            pkgs.libiconv
-          ];
+            termusix_x86_64-windows = import ./nix/window-build.nix {
+              inherit localSystem inputs;
+              pathCwd = ./.;
+            };
+          }
+          // (
+            if localSystem == "aarch64-darwin"
+            then {
+              termusix_aarch64-apple = import ./nix/cross-build.nix {
+                inherit localSystem inputs;
+                pathCwd = ./.;
+                crossSystem = "aarch64-darwin";
+                rustTargetTriple = "aarch64-apple-darwin";
+              };
 
-        nativeBuildInputs = with pkgs; [
-          pkg-config
-        ];
-      };
+              tar-darwin-arm = pkgs.callPackage ./nix/tar-package.nix {
+                termusix = self.packages.${localSystem}.termusix_aarch64-apple;
+                architecture = "arm";
+              };
 
-      termusix = craneLib.buildPackage (commonArgs
-        // {
-          cargoArtifacts = craneLib.buildDepsOnly commonArgs;
+              termusix_x86_64-apple = import ./nix/cross-build.nix {
+                inherit localSystem inputs;
+                pathCwd = ./.;
+                crossSystem = "x86_64-darwin";
+                rustTargetTriple = "x86_64-apple-darwin";
+              };
 
-          # Additional environment variables or build phases/hooks can be set
-          # here *without* rebuilding all dependency crates
-          # MY_CUSTOM_VAR = "some value";
-        });
-    in {
-      checks = {
-        inherit termusix;
-      };
+              tar-darwin-x86_64 = pkgs.callPackage ./nix/tar-package.nix {
+                termusix = self.packages.${localSystem}.termusix_x86_64-apple;
+                architecture = "intel";
+              };
 
-      packages.default = termusix;
+              build-rb-homebrew = pkgs.callPackage ./nix/homebrew-package.nix {
+                termusixArm = self.packages.${localSystem}.termusix_aarch64-apple;
+                termusixIntel = self.packages.${localSystem}.termusix_x86_64-apple;
+              };
+            }
+            else if localSystem == "x86_64-darwin"
+            then {
+              termusix_x86_64-apple = import ./nix/cross-build.nix {
+                inherit localSystem inputs;
+                pathCwd = ./.;
+                crossSystem = "x86_64-darwin";
+                rustTargetTriple = "x86_64-apple-darwin";
+              };
+            }
+            else {}
+          );
+      in
+        definetermusixPkgs {};
 
       apps.default = flake-utils.lib.mkApp {
-        drv = termusix;
+        drv = nixpkgs.lib.getAttr "termusix_${localSystem}" self.packages.${localSystem};
       };
 
-      devShells.default = craneLib.devShell {
-        checks = self.checks.${system};
-
-        # Additional dev-shell environment variables can be set directly
-        # MY_CUSTOM_DEVELOPMENT_VAR = "something else";
-        shellHook = ''
-          alias cls="clear"
-        '';
-
-        # Extra inputs can be added here; cargo and rustc are provided by default.
-        packages = [
-          # pkgs.ripgrep
-        ];
-      };
-    });
+      devShells.default = let
+        pkgs = nixpkgs.legacyPackages.${localSystem};
+      in
+        pkgs.mkShell {
+          packages = with pkgs; [
+            patchelf
+          ];
+        };
+    })
+    // {
+      formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixpkgs-fmt;
+    };
 }
