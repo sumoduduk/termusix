@@ -55,6 +55,17 @@
               inherit localSystem inputs;
               pathCwd = ./.;
             };
+
+            termusix-pkgbuild = pkgs.callPackage ./nix/pkgbuild.nix {
+              termusix = self.packages.${localSystem}.termusix_x86_64-linux;
+            };
+
+            get_termusix_version =
+              pkgs.runCommand "get_termusix_version" {
+              } ''
+                mkdir -p $out
+                echo ${self.packages.${localSystem}.termusix_x86_64-linux.version} > $out/version.txt
+              '';
           }
           // (
             if localSystem == "aarch64-darwin"
