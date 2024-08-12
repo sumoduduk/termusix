@@ -11,11 +11,46 @@ A terminal-based music player with a user-friendly terminal UI, built with Rust.
 
 ## Installation
 
-_(will be added soon)_
+### Arch Linux (via AUR)
+
+- Download the AUR package for termusix: (You can install it with your favourite AUR helper)
+
+```bash
+yay -S termusix-bin
+
+```
+
+### MacOS
+
+- **Prerequisites:**
+
+Install Homebrew [brew.sh](https://brew.sh/)
+
+- **Install it:**
+
+```bash
+brew tap sumoduduk/tap && brew install termusix
+
+```
+
+### Other OS and Distro
+
+- **Prerequisites:**
+
+1. Rust and Cargo installed on your system. You can find installation instructions at [https://www.rust-lang.org/](https://www.rust-lang.org/).
+2. See the requirment for development
+
+- **Install it with cargo:**
+
+  ```bash
+  cargo install termusix
+  ```
 
 ## Usage
 
-_(will be added soon)_
+Run the app in terminal
+
+`$ termusix`
 
 ## Development
 
