@@ -80,9 +80,9 @@ jobs:
           path : binaries/termusix-x86_64-windows.exe
 
 
-  build-for-apple:
-    name: build for apple Mac
-    runs-on: macos-latest
+  build-for-apple-intel:
+    name: build for x86_64-apple-darwin
+    runs-on: macos-13
     needs: [verify-flake]
     steps:
       - uses: actions/checkout@v4
@@ -90,44 +90,113 @@ jobs:
         with:
           cachix_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
 
-      - name : create binaries folder for arm and mac-intel
-        run: |
-          mkdir -p  binaries-arm
-          mkdir -p  binaries-intel
-
-      - name: Build termusix for aarch64-apple-darwin
-        run: |
-          nix build .#termusix_aarch64-apple --show-trace --log-lines 10000
-          ./result/bin/termusix --version
-          cp ./result/bin/termusix binaries-arm/termusix-aarch64-apple
-
-      - name: tar the package for mac-arm
-        run: |
-          nix build .#tar-darwin-arm --show-trace --log-lines 10000
-          cp ./result/* binaries-arm/
-
-      - name: upload packages termusix-aarch64-apple
-        uses: actions/upload-artifact@v4
-        with: 
-          name: termusix-aarch64-apple
-          path: binaries-arm/*
-
       - name: Build termusix for x86_64-apple-darwin
         run: |
           nix build .#termusix_x86_64-apple --show-trace --log-lines 10000
           ./result/bin/termusix --version
-          cp ./result/bin/termusix binaries-intel/termusix-x86_64-apple
-
-      - name: tar the package for mac-intel
-        run: |
-          nix build .#tar-darwin-arm --show-trace --log-lines 10000
-          cp ./result/* binaries-intel/
+          cp ./result/bin/termusix binaries/termusix-x86_64-apple
 
       - name : upload packages termusix-x86_64-apple
         uses : actions/upload-artifact@v4
         with : 
           name : termusix-x86_64-apple
-          path : binaries-intel/*
+          path : binaries/*
+
+      - name: tar the package for mac-intel
+        run: |
+          mkdir -p tar_folder
+          nix build .#tar-darwin-x86_64 --show-trace --log-lines 10000
+          cp ./result/* tar_folder/
+
+      - name: upload packages termusix-aarch64-apple
+        uses: actions/upload-artifact@v4
+        with: 
+          name: termusix-x86_64-apple-tar
+          path: tar_folder/*
+
+
+  build-for-apple-arm:
+    name: build for apple Mac
+    runs-on: macos-latest
+    needs: [build-for-apple-intel]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/common-setup
+        with:
+          cachix_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Build termusix for aarch64-apple-darwin
+        run: |
+          nix build .#termusix_aarch64-apple --show-trace --log-lines 10000
+          ./result/bin/termusix --version
+          cp ./result/bin/termusix binaries/termusix-aarch64-apple
+
+      - name: upload packages termusix-aarch64-apple
+        uses: actions/upload-artifact@v4
+        with: 
+          name: termusix-aarch64-apple
+          path: binaries/termusix-aarch64-apple
+
+      - name: tar the package for mac-arm
+        run: |
+          mkdir -p tar_arm
+          nix build .#tar-darwin-arm --show-trace --log-lines 10000
+          cp ./result/* tar_arm/
+
+      - name: upload packages termusix-aarch64-apple
+        uses: actions/upload-artifact@v4
+        with: 
+          name: termusix-aarch64-apple-tar
+          path: tar_arm/*
+
+      - name: download tar artifact from darwin intel
+        uses: actions/download-artifact@v4
+        with: 
+          name: termusix-x86_64-apple-tar
+          path: tar_intel
+
+      - name: calulate sha of tar intel 
+        run: |
+          first_tar_gz=$(ls tar_intel/*.tar.gz | head -n 1)
+          if [ -z "$first_tar_gz" ]; then
+           echo "No .tar.gz file found in artifacts directory"
+           exit 1
+          fi
+          checksum=$(shasum -a 256 "$first_tar_gz" | awk '{print $1}')
+          echo "checksum_intel=$checksum" >> $GITHUB_ENV
+
+      - name: calulate sha of tar arm 
+        run: |
+          first_tar_gz=$(ls tar_arm/*.tar.gz | head -n 1)
+          if [ -z "$first_tar_gz" ]; then
+           echo "No .tar.gz file found in artifacts directory"
+           exit 1
+          fi
+          checksum=$(shasum -a 256 "$first_tar_gz" | awk '{print $1}')
+          echo "checksum_arm=$checksum" >> $GITHUB_ENV
+
+      - name: get version of app
+        run: |
+          nix build .#get_termusix_version_darwin
+          version=$(cat result/version.txt)
+          echo "version_termusix=$version" >> $GITHUB_ENV
+
+      - name: build the ruby file 
+        run: |
+          shaArm=${{ env.checksum_arm }}
+          shaIntel=${{ env.checksum_intel }}
+          version=${{ env.version_termusix }}
+          echo "checksum_arm=$shaArm"
+          echo "checksum_intel=$shaIntel"
+          echo "version=$version"
+          nix develop --command ./scripts/pack_homebrew.sh $shaArm $shaIntel $version
+          cat rb_build/termusix.rb
+
+      - name: upload ruby file
+        uses: actions/upload-artifact@v4
+        with:
+          name: homebrew-pack-termusix
+          path: rb_build/termusix.rb
 
 
   test-from-latest-ubuntu:
@@ -135,7 +204,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-for-linux_x86_64
     steps: 
-
     - uses: actions/download-artifact@v4
       with:
         name: termusix-x86_64-linux
@@ -149,7 +217,7 @@ jobs:
   test-from-apple-arm:
     name : test for apple ARM
     runs-on: macos-latest
-    needs: build-for-apple
+    needs: build-for-apple-arm
     steps: 
     - uses: actions/download-artifact@v4
       with: 
@@ -164,7 +232,7 @@ jobs:
   test-from-apple-x86_64:
     name : test for  x86_64-apple-darwin
     runs-on: macos-13
-    needs: build-for-apple
+    needs: build-for-apple-intel
     steps: 
     - uses: actions/download-artifact@v4
       with: 
@@ -175,7 +243,6 @@ jobs:
 
     - name: Ensure the command runs
       run: ./termusix-x86_64-apple --version
-
 
   test-from-windows:
     name : test for windows
@@ -199,14 +266,10 @@ jobs:
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
-
-      - name: Assemble release directory
-        run: |
-          mkdir release
-            cp "$i"/* "release/"
-          done
-
-          tree
+        with:
+          path: release
+          pattern: termusix-*
+          merge-multiple: true
 
       - name : List all packages
         run : ls -R
