@@ -82,6 +82,15 @@
                 architecture = "arm";
               };
 
+              get_termusix_version_darwin =
+                pkgs.runCommand "get_termusix_version_darwin" {
+                } ''
+                  mkdir -p $out
+                    echo ${self.packages.${localSystem}.termusix_aarch64-apple.version} > $out/version.txt
+                '';
+            }
+            else if localSystem == "x86_64-darwin"
+            then {
               termusix_x86_64-apple = import ./nix/cross-build.nix {
                 inherit localSystem inputs;
                 pathCwd = ./.;
@@ -92,20 +101,6 @@
               tar-darwin-x86_64 = pkgs.callPackage ./nix/tar-package.nix {
                 termusix = self.packages.${localSystem}.termusix_x86_64-apple;
                 architecture = "intel";
-              };
-
-              build-rb-homebrew = pkgs.callPackage ./nix/homebrew-package.nix {
-                termusixArm = self.packages.${localSystem}.termusix_aarch64-apple;
-                termusixIntel = self.packages.${localSystem}.termusix_x86_64-apple;
-              };
-            }
-            else if localSystem == "x86_64-darwin"
-            then {
-              termusix_x86_64-apple = import ./nix/cross-build.nix {
-                inherit localSystem inputs;
-                pathCwd = ./.;
-                crossSystem = "x86_64-darwin";
-                rustTargetTriple = "x86_64-apple-darwin";
               };
             }
             else {}
