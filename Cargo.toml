@@ -17,7 +17,7 @@ keywords = [
   "terminal-ui",
   "music-player",
 ]
-categories = ["terminal", "music-player",  "cli"]
+categories = ["asynchronous", "command-line-utilities", "concurrency" ]
 authors = ["Iqbal Abdurachman <email@abdurachmaniqbal.my.id>"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
