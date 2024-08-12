@@ -19,6 +19,7 @@
      arch=("x86_64")
      provides=("termusix")
      conflicts=("termusix")
+     depends=("alsa-lib" "dbus")
      source=("https://github.com/sumoduduk/termusix/releases/download/v$pkgver/termusix-$CARCH-linux")
      sha256sums=("%%SHA256SUM%%")
 
@@ -38,6 +39,8 @@
     	license = GPL-3.0
     	provides = termusix
     	conflicts = termusix
+      depends = alsa-lib
+      depends = dbus
     	source = https://github.com/sumoduduk/termusix/releases/download/v${termusix.version}/termusix-x86_64-linux
     	sha256sums = %%SHA256SUM%%
 
