@@ -55,13 +55,14 @@
           pkgs.libiconv
           pkgs.darwin.apple_sdk.frameworks.Foundation
           # pkgs.darwin.apple_sdk.frameworks.Security
+          # pkgs.darwin.apple_sdk.frameworks.IOKit
           pkgs.darwin.apple_sdk.frameworks.CoreFoundation
           # pkgs.darwin.apple_sdk.frameworks.CoreServices
           pkgs.darwin.apple_sdk.frameworks.CoreAudio
           pkgs.darwin.apple_sdk.frameworks.AudioToolbox
-          # pkgs.darwin.apple_sdk.frameworks.CoreMIDI
-          # pkgs.darwin.apple_sdk.frameworks.IOKit
+          pkgs.darwin.apple_sdk.frameworks.CoreMIDI
           pkgs.darwin.apple_sdk.frameworks.AudioUnit
+          pkgs.darwin.apple_sdk.frameworks.OpenAl
         ];
 
       CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER = "${stdenv.cc.targetPrefix}cc";
