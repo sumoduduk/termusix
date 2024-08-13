@@ -45,9 +45,11 @@
 
       buildInputs =
         [
-          pkgs.alsa-lib
-          pkgs.dbus
           #pkgs.openssl
+          pkgs.dbus
+        ]
+        ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
+          pkgs.alsa-lib
         ]
         ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
           pkgs.libiconv
