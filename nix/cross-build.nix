@@ -38,10 +38,14 @@
       doCheck = false;
       strictDeps = true;
 
-      nativeBuildInputs = [
-        stdenv.cc
-        pkg-config
-      ];
+      nativeBuildInputs =
+        [
+          stdenv.cc
+          pkg-config
+        ]
+        ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
+          pkgs.rustPlatform.bindgenHook
+        ];
 
       buildInputs =
         [
@@ -55,8 +59,9 @@
           pkgs.libiconv
           pkgs.darwin.apple_sdk.frameworks.Foundation
           # pkgs.darwin.apple_sdk.frameworks.Security
+          # pkgs.darwin.apple_sdk.frameworks.IOKit
           pkgs.darwin.apple_sdk.frameworks.CoreFoundation
-          # pkgs.darwin.apple_sdk.frameworks.CoreServices
+          pkgs.darwin.apple_sdk.frameworks.CoreServices
           pkgs.darwin.apple_sdk.frameworks.CoreAudio
           pkgs.darwin.apple_sdk.frameworks.AudioToolbox
           # pkgs.darwin.apple_sdk.frameworks.CoreMIDI
@@ -72,6 +77,8 @@
 
       HOST_CC = "${stdenv.cc.nativePrefix}cc";
       TARGET_CC = "${stdenv.cc.targetPrefix}cc";
+
+      NIX_OUTPATH_USED_AS_RANDOM_SEED = "aaaaaaaaaa";
     };
 
     cargoArtifacts = craneLib.buildDepsOnly commonArgs;

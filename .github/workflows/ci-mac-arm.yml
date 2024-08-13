@@ -1,4 +1,4 @@
-name: "CI mac x86_64"
+name: "CI mac ARM"
 
 on:
   workflow_dispatch:
