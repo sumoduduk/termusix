@@ -62,7 +62,7 @@
           pkgs.darwin.apple_sdk.frameworks.AudioToolbox
           pkgs.darwin.apple_sdk.frameworks.CoreMIDI
           pkgs.darwin.apple_sdk.frameworks.AudioUnit
-          pkgs.darwin.apple_sdk.frameworks.OpenAl
+          pkgs.darwin.apple_sdk.frameworks.OpenAL
         ];
 
       CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER = "${stdenv.cc.targetPrefix}cc";
