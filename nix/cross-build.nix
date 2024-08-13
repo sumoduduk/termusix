@@ -40,7 +40,7 @@
 
       nativeBuildInputs = [
         stdenv.cc
-        pkg-config
+        pkgs.rustPlatform.bindgenHook
       ];
 
       buildInputs =
