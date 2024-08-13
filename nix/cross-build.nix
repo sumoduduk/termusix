@@ -38,10 +38,13 @@
       doCheck = false;
       strictDeps = true;
 
-      nativeBuildInputs = [
-        stdenv.cc
-        pkgs.rustPlatform.bindgenHook
-      ];
+      nativeBuildInputs =
+        [
+          stdenv.cc
+        ]
+        ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
+          pkgs.rustPlatform.bindgenHook
+        ];
 
       buildInputs =
         [
