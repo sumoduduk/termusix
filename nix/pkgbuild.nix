@@ -48,11 +48,16 @@
   '';
 in
   runCommand "termusix-bin-aur" {inherit srcinfo pkgbuild;} ''
-    sha256=$(sha256sum ${termusix}/bin/termusix | awk '{print $1}')
-
     mkdir -p $out
+    cp ${termusix}/bin/termusix $out/termusix
+
+    chmod 777 $out/termusix
+    patchelf --set-interpreter /lib64/ld-linux-x86-64.so.2 --set-rpath /lib/x86_64-linux-gnu $out/termusix
+
+    sha256=$(sha256sum $out/termusix | awk '{print $1}')
+
 
     echo "$srcinfo" | sed "s/%%SHA256SUM%%/$sha256/" > $out/.SRCINFO
     echo "$pkgbuild" | sed "s/%%SHA256SUM%%/$sha256/" > $out/PKGBUILD
-
+    rm $out/termusix
   ''
