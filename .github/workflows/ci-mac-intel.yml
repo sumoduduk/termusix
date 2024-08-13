@@ -1,0 +1,24 @@
+name: "CI mac x86_64"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-for-apple-intel:
+    name: build for x86_64-apple-darwin
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/common-setup
+        with:
+          cachix_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Build termusix for x86_64-apple-darwin
+        run: |
+          nix build .#termusix_x86_64-apple --show-trace --log-lines 10000
+          ./result/bin/termusix --version
+
+      - name: tar the package for mac-intel
+        run: |
+          nix build .#tar-darwin-x86_64 --show-trace --log-lines 10000
+          ls result
