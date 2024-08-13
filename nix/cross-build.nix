@@ -57,25 +57,26 @@
           # pkgs.darwin.apple_sdk.frameworks.Security
           # pkgs.darwin.apple_sdk.frameworks.IOKit
           pkgs.darwin.apple_sdk.frameworks.CoreFoundation
-          # pkgs.darwin.apple_sdk.frameworks.CoreServices
+          pkgs.darwin.apple_sdk.frameworks.CoreServices
           pkgs.darwin.apple_sdk.frameworks.CoreAudio
           pkgs.darwin.apple_sdk.frameworks.AudioToolbox
           pkgs.darwin.apple_sdk.frameworks.CoreMIDI
           pkgs.darwin.apple_sdk.frameworks.AudioUnit
           pkgs.darwin.apple_sdk.frameworks.OpenAL
+          pkgs.darwin.apple_sdk.frameworks.AppKit
         ];
 
       CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER = lib.optionalString stdenv.isLinux "${stdenv.cc.targetPrefix}cc";
       CARGO_TARGET_AARCH64_UNKNOWN_APPLE_LINKER = lib.optionalString stdenv.isDarwin "${stdenv.cc.targetPrefix}cc";
 
-      COREAUDIO_SDK_PATH = lib.optionalString stdenv.isDarwin "${pkgs.darwin.apple_sdk.frameworks.CoreAudio}/Library/Frameworks/CoreAudio.framework/Headers";
+      # COREAUDIO_SDK_PATH = lib.optionalString stdenv.isDarwin "${pkgs.darwin.apple_sdk.frameworks.CoreAudio}/Library/Frameworks/CoreAudio.framework/Headers";
 
-      BINDGEN_EXTRA_CLANG_ARGS = lib.optionalString stdenv.isDarwin (builtins.concatStringsSep " " [
-        "-I${pkgs.darwin.apple_sdk.frameworks.CoreAudio}/Library/Frameworks/CoreAudio.framework/Headers"
-        "-I${pkgs.darwin.apple_sdk.frameworks.AudioUnit}/Library/Frameworks/AudioUnit.framework/Headers"
-        "-F${pkgs.darwin.apple_sdk.frameworks.CoreAudio}/Library/Frameworks"
-        "-F${pkgs.darwin.apple_sdk.frameworks.AudioUnit}/Library/Frameworks"
-      ]);
+      # BINDGEN_EXTRA_CLANG_ARGS = lib.optionalString stdenv.isDarwin (builtins.concatStringsSep " " [
+      #   "-I${pkgs.darwin.apple_sdk.frameworks.CoreAudio}/Library/Frameworks/CoreAudio.framework/Headers"
+      #   "-I${pkgs.darwin.apple_sdk.frameworks.AudioUnit}/Library/Frameworks/AudioUnit.framework/Headers"
+      #   "-F${pkgs.darwin.apple_sdk.frameworks.CoreAudio}/Library/Frameworks"
+      #   "-F${pkgs.darwin.apple_sdk.frameworks.AudioUnit}/Library/Frameworks"
+      # ]);
 
       cargoExtraArgs = "--target ${rustTargetTriple}";
 
