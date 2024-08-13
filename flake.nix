@@ -66,6 +66,11 @@
                 mkdir -p $out
                 echo ${self.packages.${localSystem}.termusix_x86_64-linux.version} > $out/version.txt
               '';
+
+            termusix-docker = import ./nix/docker_build.nix {
+              inherit localSystem inputs;
+              termusix = self.packages.${localSystem}.termusix_x86_64-linux;
+            };
           }
           // (
             if localSystem == "aarch64-darwin"
