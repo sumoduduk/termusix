@@ -41,6 +41,7 @@
       nativeBuildInputs =
         [
           stdenv.cc
+          pkg-config
         ]
         ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
           pkgs.rustPlatform.bindgenHook
@@ -85,6 +86,8 @@
 
       HOST_CC = "${stdenv.cc.nativePrefix}cc";
       TARGET_CC = "${stdenv.cc.targetPrefix}cc";
+
+      NIX_OUTPATH_USED_AS_RANDOM_SEED = "aaaaaaaaaa";
     };
 
     cargoArtifacts = craneLib.buildDepsOnly commonArgs;
