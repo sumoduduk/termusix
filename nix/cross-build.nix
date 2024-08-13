@@ -61,10 +61,12 @@
           pkgs.darwin.apple_sdk.frameworks.AudioToolbox
           # pkgs.darwin.apple_sdk.frameworks.CoreMIDI
           # pkgs.darwin.apple_sdk.frameworks.IOKit
+          pkgs.darwin.apple_sdk.frameworks.AudioUnit
         ];
 
       CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER = "${stdenv.cc.targetPrefix}cc";
       CARGO_TARGET_AARCH64_UNKNOWN_APPLE_LINKER = "${stdenv.cc.targetPrefix}cc";
+      COREAUDIO_SDK_PATH = "${pkgs.darwin.apple_sdk.path}/System/Library/Frameworks/CoreAudio.framework/Versions/A/Headers";
 
       cargoExtraArgs = "--target ${rustTargetTriple}";
 
