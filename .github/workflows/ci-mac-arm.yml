@@ -1,0 +1,27 @@
+name: "CI mac x86_64"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-for-apple-arm:
+    name: build for apple Mac
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/common-setup
+        with:
+          cachix_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Build termusix for aarch64-apple-darwin
+        run: |
+          nix build .#termusix_aarch64-apple --show-trace --log-lines 10000
+          ./result/bin/termusix --version
+
+
+      - name: tar the package for mac-arm
+        run: |
+          mkdir -p tar_arm
+          nix build .#tar-darwin-arm --show-trace --log-lines 10000
+          cp ./result/* tar_arm/
+          ls tar_arm
