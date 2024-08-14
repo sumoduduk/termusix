@@ -5,7 +5,7 @@ use crate::utils::time_now;
 use super::{InfoMusicPlaylist, Playlist};
 use indexmap::IndexMap;
 
-pub fn save_local(playlist: &mut Playlist, id: &str) {
+pub fn save_local_inner(id: &str) -> (String, InfoMusicPlaylist) {
     let music_info = IndexMap::new();
     let info_playlist: InfoMusicPlaylist = InfoMusicPlaylist {
         playlist_title: id.to_owned(),
@@ -15,6 +15,12 @@ pub fn save_local(playlist: &mut Playlist, id: &str) {
     let time = time_now();
 
     let key = [id, "-local", "-", &time.to_string()].concat();
+
+    (key, info_playlist)
+}
+
+pub fn save_local(playlist: &mut Playlist, id: &str) {
+    let (key, info_playlist) = save_local_inner(id);
 
     playlist.0.insert(key, info_playlist);
 }
