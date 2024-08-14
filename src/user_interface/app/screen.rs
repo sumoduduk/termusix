@@ -9,8 +9,8 @@ const WHITE_BORDER: Style = Style::new().fg(WHITE);
 #[derive(Debug, Default, PartialEq, Eq)]
 pub enum Screen {
     Playback,
-    #[default]
     Playlist,
+    #[default]
     ListMusic,
     InsertPlaylist,
     AddSongPopup(AddSongPopup),
