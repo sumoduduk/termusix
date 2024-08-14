@@ -35,7 +35,7 @@ pub fn render_help(_app: &App, area: Rect, buf: &mut Buffer) {
         "",
         "K : Scroll up",
         "",
-        "R : Switch Mode",
+        "R : Switch Mode Repeat All/ Normal/ Repeat One",
     ];
 
     let line_msg = msg_help.map(Line::from);
