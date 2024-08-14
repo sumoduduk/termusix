@@ -4,24 +4,23 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-for-apple-arm:
-    name: build for apple Mac
+  sandbox-build-apple-arm:
+    name: sandbox build for apple ARM
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/common-setup
+      - name: Install nix
+        uses: cachix/install-nix-action@v27
         with:
-          cachix_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
+            nix_path: nixpkgs=channel:nixos-unstable
 
-      - name: Build termusix for aarch64-apple-darwin
+      - uses: cachix/cachix-action@v15
+        with:
+          name: nix-community
+
+      - name: Build termusix for aarch64-apple-darwin in sandbox mode
         run: |
-          nix build .#termusix_aarch64-apple --show-trace --log-lines 10000
+          cd ./nix/pkgs
+          nix-build --option sandbox true -E 'with import <nixpkgs> { }; callPackage ./default.nix { }'
           ./result/bin/termusix --version
 
-
-      - name: tar the package for mac-arm
-        run: |
-          mkdir -p tar_arm
-          nix build .#tar-darwin-arm --show-trace --log-lines 10000
-          cp ./result/* tar_arm/
-          ls tar_arm
