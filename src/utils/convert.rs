@@ -7,10 +7,8 @@ use tokio::process::Command;
 
 use crate::file_ops::{extract_extentions, get_parent};
 
-pub async fn convert_folder() -> eyre::Result<()> {
-    let home = dirs::home_dir().expect("need home dir");
-    let music_dir = dirs::audio_dir().unwrap_or(home.join("Music"));
-    let mut entries = read_dir(music_dir).await?;
+pub async fn convert_folder(path_target: &Path) -> eyre::Result<()> {
+    let mut entries = read_dir(path_target).await?;
 
     while let Some(entry) = entries.next_entry().await? {
         let path_buf = entry.path();
