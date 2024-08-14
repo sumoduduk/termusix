@@ -9,12 +9,12 @@ use crate::app::{App, Screen};
 
 pub fn render_footer(app: &App, footer_layout: Rect, buf: &mut Buffer) {
     let footer_msg = match app.screen_state {
-        Screen::Playback => "Press TAB to switch to Playlist | (?) for help | SPACE to toggle play/pause",
+        Screen::Playback => "Press TAB to switch to Playlist | SPACE to toggle play/pause | (?) for help",
         Screen::Playlist => {
-            "Press TAB/ENTER to switch to Music List | (?) for help | ↑ or ↓ to scroll playlist | P to play"
+            "Press TAB/ENTER to switch to Music List | ↑ or ↓ to scroll playlist | P to play | (?) for help"
         }
         Screen::ListMusic => {
-            "Press TAB to switch to Now Playing | (?) for help | ↑ or ↓ to scroll song | ENTER to play"
+            "Press TAB to switch to Now Playing | ENTER to play | ↑ or ↓ to scroll song | (?) for help"
         }
         _ => "",
     };
