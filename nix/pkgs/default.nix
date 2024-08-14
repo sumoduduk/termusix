@@ -6,6 +6,7 @@
   stdenv,
   darwin,
   alsa-lib,
+  libiconv,
 }:
 rustPlatform.buildRustPackage rec {
   pname = "termusix";
@@ -29,6 +30,10 @@ rustPlatform.buildRustPackage rec {
     lib.optionals stdenv.isDarwin [
       darwin.apple_sdk.frameworks.CoreAudio
       darwin.apple_sdk.frameworks.Security
+      darwin.apple_sdk.frameworks.AudioUnit
+      darwin.apple_sdk.frameworks.AudioToolbox
+      darwin.apple_sdk.frameworks.Foundation
+      libiconv
     ]
     ++ lib.optionals stdenv.isLinux [
       alsa-lib
