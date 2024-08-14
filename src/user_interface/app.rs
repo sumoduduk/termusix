@@ -13,6 +13,7 @@ use tui_input::Input;
 use widget_playback_buttons::SelectedButton;
 
 use crate::{
+    file_ops::extract_extentions,
     file_song::{FileExplorer, Theme},
     playback::PlaybackEvent,
     playlist::Playlist,
@@ -61,7 +62,13 @@ pub struct App {
 impl App {
     /// Constructs a new instance of [`App`].
     pub fn new(tx: Sender<PlaybackEvent>, now_playing: NowPlaying) -> Self {
-        let playlist = Playlist::new().expect("ERROR: No playlist found");
+        let mut playlist = Playlist::new().expect("ERROR: No playlist found");
+
+        if playlist.list_playlist_titles().is_empty() {
+            let path_music = Self::song_list_init();
+            let _ = playlist.save_local_playlist("Music Folder");
+            let _ = playlist.save_local_song(&path_music, 0);
+        }
 
         let theme = Theme::default().add_default_title();
         let mut file_explorer = FileExplorer::with_theme(theme).unwrap();
@@ -70,13 +77,17 @@ impl App {
             let _ = file_explorer.set_cwd(music_path);
         }
 
+        let mut tab_state = ListState::default();
+
+        *tab_state.selected_mut() = Some(0);
+
         Self {
             running: true,
             state_play: StatePlay::Normal,
             music_list: ListState::default(),
             screen_state: Screen::default(),
             playlist,
-            tabs_playlist: ListState::default(),
+            tabs_playlist: tab_state,
             tx_playback: tx,
             now_playing,
             input_playlist: Input::default(),
@@ -276,6 +287,36 @@ impl App {
     pub fn mute_toggle(&self) {
         let sender = self.tx_playback.clone();
         let _ = sender.send(PlaybackEvent::Mute(self.volume));
+    }
+
+    fn song_list_init() -> Vec<PathBuf> {
+        let home = dirs::home_dir().map(|p| p.join("Music"));
+        let music_dir = dirs::audio_dir().or(home);
+
+        let default_song_list = if let Some(song_dir) = music_dir {
+            std::fs::read_dir(song_dir)
+                .ok()
+                .map(|dir| {
+                    dir.filter_map(|entry| {
+                        entry.ok().and_then(|e| {
+                            let path_file = e.path();
+                            let ext = extract_extentions(&path_file);
+                            match ext {
+                                Some("mp3") | Some("flac") | Some("wav") | Some("ogg") => {
+                                    Some(path_file)
+                                }
+                                _ => None,
+                            }
+                        })
+                    })
+                    .collect()
+                })
+                .unwrap_or_else(Vec::new)
+        } else {
+            Vec::new()
+        };
+
+        default_song_list
     }
 }
 
