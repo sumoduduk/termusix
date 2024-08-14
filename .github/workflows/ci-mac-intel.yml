@@ -4,21 +4,22 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-for-apple-intel:
-    name: build for x86_64-apple-darwin
+  sandbox-build-for-apple-intel:
+    name: sandbox build for apple x86_64
     runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/common-setup
+      - name: Install nix
+        uses: cachix/install-nix-action@v27
         with:
-          cachix_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
+            nix_path: nixpkgs=channel:nixos-unstable
 
-      - name: Build termusix for x86_64-apple-darwin
+      - uses: cachix/cachix-action@v15
+        with:
+          name: nix-community
+
+      - name: Build termusix for x86_64-apple-darwin in sandbox mode
         run: |
-          nix build .#termusix_x86_64-apple --show-trace --log-lines 10000
+          cd ./nix/pkgs
+          nix-build --option sandbox true -E 'with import <nixpkgs> { }; callPackage ./default.nix { }'
           ./result/bin/termusix --version
-
-      - name: tar the package for mac-intel
-        run: |
-          nix build .#tar-darwin-x86_64 --show-trace --log-lines 10000
-          ls result
