@@ -13,6 +13,7 @@ use ratatui::{backend::CrosstermBackend, Terminal};
 use serde::{Deserialize, Serialize};
 use std::env::args;
 use std::io;
+use std::path::Path;
 use std::sync::{Arc, RwLock};
 use utils::convert::convert_folder;
 
@@ -54,11 +55,21 @@ async fn main() -> eyre::Result<()> {
     if let Some(arg) = args.next() {
         match arg.trim() {
             "--convert" => {
-                convert_folder().await?;
+                if let Some(path_folder) = args.next() {
+                    let path_target = Path::new(&path_folder);
+
+                    if path_target.exists() {
+                        convert_folder(path_target).await?;
+                    } else {
+                        eprintln!("Path not exist, use absolute path");
+                    }
+                } else {
+                    eprintln!("Must specify path folder what you want to convert");
+                }
             }
 
             "--version" | "-V" => {
-                println!("termusix v0.1.0");
+                println!("termusix v0.1.1");
             }
 
             _ => {
