@@ -31,10 +31,10 @@
     rust-overlay,
     ...
   }:
-    flake-utils.lib.eachDefaultSystem (localSystem: {
+    flake-utils.lib.eachDefaultSystem (localSystem: let
+      pkgs = nixpkgs.legacyPackages.${localSystem};
+    in {
       packages = let
-        pkgs = nixpkgs.legacyPackages.${localSystem};
-
         definetermusixPkgs = {}:
           {
             termusix_aarch64-linux = import ./nix/cross-build.nix {
@@ -108,18 +108,26 @@
       in
         definetermusixPkgs {};
 
+      defaultPackage =
+        if localSystem == "x86_64-linux"
+        then self.packages.${localSystem}.termusix_x86_64-linux
+        else if localSystem == "aarch64-linux"
+        then self.packages.${localSystem}.termusix_aarch64-linux
+        else if localSystem == "x86_64-darwin"
+        then self.packages.${localSystem}.termusix_x86_64-apple
+        else if localSystem == "aarch64-darwin"
+        then self.packages.${localSystem}.termusix_aarch64-apple
+        else null;
+
       apps.default = flake-utils.lib.mkApp {
         drv = nixpkgs.lib.getAttr "termusix_${localSystem}" self.packages.${localSystem};
       };
 
-      devShells.default = let
-        pkgs = nixpkgs.legacyPackages.${localSystem};
-      in
-        pkgs.mkShell {
-          packages = with pkgs; [
-            patchelf
-          ];
-        };
+      devShells.default = pkgs.mkShell {
+        packages = with pkgs; [
+          patchelf
+        ];
+      };
     })
     // {
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixpkgs-fmt;
