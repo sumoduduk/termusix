@@ -1,4 +1,6 @@
-# Termusix
+# Termusix Player
+
+![termusix](./assets/termusix.webp)
 
 A terminal-based music player with a user-friendly terminal UI, built with Rust.
 
