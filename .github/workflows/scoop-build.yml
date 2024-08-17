@@ -1,6 +1,8 @@
 name: "Build scoop"
 on:
   workflow_dispatch:
+env:
+  GH_TOKEN: ${{ github.token }}
 jobs:
   # build-scoop-appmanifest:
   #   name: build scoop app manifest with nix
@@ -33,7 +35,7 @@ jobs:
           $release = gh release view --json tagName --jq ".tagName"
           echo "Latest release version: $release"
           echo "::set-output name=version::$release"
-          shell: pwsh
+        shell: pwsh
       - name: Download the latest release file
         run: |
           $version = "${{ steps.get_latest_release.outputs.version }}"
@@ -76,11 +78,13 @@ jobs:
           }
            "@
            $jsonContent | Set-Content -Path "termusix.json"
-           shell: pwsh
+        shell: pwsh
       - name: install scoop
         uses: MinoruSekine/setup-scoop@v4
       - name: install termusix
         run: |
           scoop install termusix.json
+        shell: pwsh
       - name: run the app
         run: termusix.exe --help
+        shell: pwsh
