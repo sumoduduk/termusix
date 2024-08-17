@@ -3,14 +3,14 @@ name : Build
 on:
   push:
     branches:
-      - main
+      - release
     paths-ignore:
       - 'assets/**'
       - '**.md'
 
   pull_request:
     branches:
-      - main
+      - release
     paths-ignore:
       - 'assets/**'
       - '**.md'
