@@ -36,7 +36,7 @@
     in {
       packages = let
         definetermusixPkgs = {}:
-          {
+          rec {
             termusix_aarch64-linux = import ./nix/cross-build.nix {
               inherit localSystem inputs;
               pathCwd = ./.;
@@ -58,6 +58,10 @@
 
             termusix-pkgbuild = pkgs.callPackage ./nix/pkgbuild.nix {
               termusix = self.packages.${localSystem}.termusix_x86_64-linux;
+            };
+
+            termusix-appmanifest = pkgs.callPackage ./nix/scoop-appmanifest.nix {
+              termusix = termusix_x86_64-windows;
             };
 
             get_termusix_version =
