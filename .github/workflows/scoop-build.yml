@@ -14,11 +14,15 @@ jobs:
         run: |
           $release = gh release view --json tagName --jq ".tagName"
           echo "Latest release version: $release"
-          echo "version=$release" >> $GITHUB_ENV
+          echo "VERSION=$release" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+        shell: pwsh
+      - name: Debug version
+        run: |
+          echo "VERSION from environment: $env:VERSION"
         shell: pwsh
       - name: Download the latest release file
         run: |
-          $version = "${{ env.version }}"
+          $version = "${{ env.VERSION }}"
           $url = "https://github.com/sumoduduk/termusix/releases/download/$version/termusix-x86_64-windows.exe"
           echo "Downloading file from: $url"
           Invoke-WebRequest -Uri $url -OutFile "termusix-x86_64-windows.exe"
@@ -28,22 +32,23 @@ jobs:
         run: |
           $hash = Get-FileHash -Path "termusix-x86_64-windows.exe" -Algorithm SHA256
           echo "SHA256: $($hash.Hash)"
-          echo "sha256sum=$($hash.Hash)" >> $GITHUB_ENV
+          echo "SHA256=$($hash.Hash)" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
         shell: pwsh
       - name: Write JSON file
         run: |
-          $version = "${{ env.version }}"
-          $sha256sum = "${{ env.sha256sum }}"
+          $version = "${{ env.VERSION }}"
+          $hash = "${{ env.SHA256 }}"
 
-          $jsonContent = @'{
+          $jsonContent = @"
+          {
             "version" : "$version",
             "homepage": "https://github.com/sumoduduk/termusix",
             "description" : "A terminal-based music player with a user-friendly terminal UI, built with Rust",
             "license": "GPL-3.0",
             "architecture": {
               "64bit": {
-                "url": "https://github.com/sumoduduk/termusix/releases/download/v$version/termusix-x86_64-windows.exe#/termusix.exe",
-                "hash": "$sha256sum"
+                "url": "https://github.com/sumoduduk/termusix/releases/download/$version/termusix-x86_64-windows.exe#/termusix.exe",
+                "hash": "$hash"
               }
             },
             "bin": "termusix.exe",
@@ -51,11 +56,12 @@ jobs:
             "autoupdate": {
               "architecture": {
                 "64bit": {
-                  "url": "https://github.com/sumoduduk/termusix/releases/download/v$version/termusix-x86_64-windows.exe#/termusix.exe"
+                  "url": "https://github.com/sumoduduk/termusix/releases/download/$version/termusix-x86_64-windows.exe#/termusix.exe"
                 }
               }
             }
-          }'@
+          }
+          "@
 
           $jsonContent | Set-Content -Path "termusix.json"
         shell: pwsh
