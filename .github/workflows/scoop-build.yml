@@ -29,6 +29,7 @@ jobs:
     name: test install app manifest with scoop
     runs-on: windows-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Get latest release version
         id: get_latest_release
         run: |
