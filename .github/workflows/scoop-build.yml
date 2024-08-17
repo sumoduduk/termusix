@@ -1,0 +1,46 @@
+name: "Build scoop"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-scoop-appmanifest:
+    name: build scoop app manifest with nix
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/common-setup
+        with:
+          cachix_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
+      - name: Build app manifest
+        run: nix build .#termusix-appmanifest --show-trace --log-lines 10000
+
+      - name: copy app manifest
+        run: | 
+          mkdir -p json_file
+          cp result/termusix.json json_file/termusix.json
+
+      - name: upload json file
+        uses: actions/upload-artifact@v4
+        with:
+          name: appmanifest-termusix
+          path: json_file/termusix.json
+
+  test-install-with-scoop:
+    name: test install app manifest with scoop
+    runs-on: windows-latest
+    needs: build-scoop-appmanifest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: appmanifest-termusix
+
+      - name: install scoop
+        uses: MinoruSekine/setup-scoop@v4
+
+      - name: install termusix
+        run: |
+          scoop install termusix.json
+
+      - name: run the app
+        run: termusix.exe --help
