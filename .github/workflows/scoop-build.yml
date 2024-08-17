@@ -76,9 +76,11 @@ jobs:
           $env:PATH
           where termusix.exe
         shell: pwsh
-      - name: Run Termusix with --help
-        run: |
-          termusix --version
-          termusix --help > output.txt
-          Get-Content -Path output.txt
+      - name: Run Termusix with --version
+        run: termusix --version
         shell: pwsh
+      - name:
+        uses: actions/upload-artifact@v4
+        with:
+          name: scoop-manifest
+          path: termusix.json
