@@ -1,5 +1,4 @@
-name : Build
-
+name: Build
 on:
   push:
     branches:
@@ -7,18 +6,15 @@ on:
     paths-ignore:
       - 'assets/**'
       - '**.md'
-
   pull_request:
     branches:
       - release
     paths-ignore:
       - 'assets/**'
       - '**.md'
-
 concurrency:
   group: ${{ github.ref_name }}-${{ github.event_name }}
   cancel-in-progress: true
-
 jobs:
   verify-flake:
     runs-on: ubuntu-20.04
@@ -27,10 +23,8 @@ jobs:
       - uses: ./.github/actions/common-setup
         with:
           cachix_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
-
       - name: Check Nix flake
         run: nix flake check --all-systems
-
   build-for-linux_x86_64:
     name: build for linux_x86_64
     runs-on: ubuntu-20.04
@@ -40,20 +34,13 @@ jobs:
       - uses: ./.github/actions/common-setup
         with:
           cachix_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
-
       - name: Build termusix for x86_64-unknown-linux-gnu
-        run: |
-          nix build .#termusix_x86_64-linux --show-trace --log-lines 10000 
-          ./result/bin/termusix --version
-          nix develop --command ./scripts/export-linux-bin.sh termusix ./binaries
-
-      - name : upload packages termusix-x86_64-linux
-        uses : actions/upload-artifact@v4
-        with : 
-          name : termusix-x86_64-linux
-          path : binaries/termusix-x86_64-linux
-
-
+        run: "nix build .#termusix_x86_64-linux --show-trace --log-lines 10000 \n./result/bin/termusix --version\nnix develop --command ./scripts/export-linux-bin.sh termusix ./binaries\n"
+      - name: upload packages termusix-x86_64-linux
+        uses: actions/upload-artifact@v4
+        with:
+          name: termusix-x86_64-linux
+          path: binaries/termusix-x86_64-linux
   build-for-arm-linux-and-windows:
     name: build for linux arm and windows
     runs-on: ubuntu-20.04
@@ -63,30 +50,24 @@ jobs:
       - uses: ./.github/actions/common-setup
         with:
           cachix_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
-
       - name: Build termusix for aarch64-unknown-linux-gnu
         run: |
           nix build .#termusix_aarch64-linux --show-trace --log-lines 10000
           cp ./result/bin/termusix binaries/termusix-aarch64-linux
-
-      - name : upload packages termusix-aarch64-linux
-        uses : actions/upload-artifact@v4
-        with : 
-          name : termusix-aarch64-linux
-          path : binaries/termusix-aarch64-linux
-
+      - name: upload packages termusix-aarch64-linux
+        uses: actions/upload-artifact@v4
+        with:
+          name: termusix-aarch64-linux
+          path: binaries/termusix-aarch64-linux
       - name: Build termusix for x86_64-pc-windows-gnu
         run: |
           nix build .#termusix_x86_64-windows --show-trace --log-lines 10000
           cp ./result/bin/termusix.exe binaries/termusix-x86_64-windows.exe
-
-      - name : upload packages termusix-x86_64-windows
-        uses : actions/upload-artifact@v4
-        with : 
-          name : termusix-x86_64-windows
-          path : binaries/termusix-x86_64-windows.exe
-
-
+      - name: upload packages termusix-x86_64-windows
+        uses: actions/upload-artifact@v4
+        with:
+          name: termusix-x86_64-windows
+          path: binaries/termusix-x86_64-windows.exe
   build-for-apple-intel:
     name: build for x86_64-apple-darwin
     runs-on: macos-13
@@ -96,32 +77,26 @@ jobs:
       - uses: ./.github/actions/common-setup
         with:
           cachix_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
-
       - name: Build termusix for x86_64-apple-darwin
         run: |
           nix build .#termusix_x86_64-apple --show-trace --log-lines 10000
           ./result/bin/termusix --version
           cp ./result/bin/termusix binaries/termusix-x86_64-apple
-
-      - name : upload packages termusix-x86_64-apple
-        uses : actions/upload-artifact@v4
-        with : 
-          name : termusix-x86_64-apple
-          path : binaries/*
-
+      - name: upload packages termusix-x86_64-apple
+        uses: actions/upload-artifact@v4
+        with:
+          name: termusix-x86_64-apple
+          path: binaries/*
       - name: tar the package for mac-intel
         run: |
           mkdir -p tar_folder
           nix build .#tar-darwin-x86_64 --show-trace --log-lines 10000
           cp ./result/* tar_folder/
-
       - name: upload packages termusix-aarch64-apple
         uses: actions/upload-artifact@v4
-        with: 
+        with:
           name: termusix-x86_64-apple-tar
           path: tar_folder/*
-
-
   build-for-apple-arm:
     name: build for apple Mac
     runs-on: macos-latest
@@ -131,38 +106,32 @@ jobs:
       - uses: ./.github/actions/common-setup
         with:
           cachix_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
-
       - name: Build termusix for aarch64-apple-darwin
         run: |
           nix build .#termusix_aarch64-apple --show-trace --log-lines 10000
           ./result/bin/termusix --version
           cp ./result/bin/termusix binaries/termusix-aarch64-apple
-
       - name: upload packages termusix-aarch64-apple
         uses: actions/upload-artifact@v4
-        with: 
+        with:
           name: termusix-aarch64-apple
           path: binaries/termusix-aarch64-apple
-
       - name: tar the package for mac-arm
         run: |
           mkdir -p tar_arm
           nix build .#tar-darwin-arm --show-trace --log-lines 10000
           cp ./result/* tar_arm/
-
       - name: upload packages termusix-aarch64-apple
         uses: actions/upload-artifact@v4
-        with: 
+        with:
           name: termusix-aarch64-apple-tar
           path: tar_arm/*
-
       - name: download tar artifact from darwin intel
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: termusix-x86_64-apple-tar
           path: tar_intel
-
-      - name: calulate sha of tar intel 
+      - name: calulate sha of tar intel
         run: |
           first_tar_gz=$(ls tar_intel/*.tar.gz | head -n 1)
           if [ -z "$first_tar_gz" ]; then
@@ -171,8 +140,7 @@ jobs:
           fi
           checksum=$(shasum -a 256 "$first_tar_gz" | awk '{print $1}')
           echo "checksum_intel=$checksum" >> $GITHUB_ENV
-
-      - name: calulate sha of tar arm 
+      - name: calulate sha of tar arm
         run: |
           first_tar_gz=$(ls tar_arm/*.tar.gz | head -n 1)
           if [ -z "$first_tar_gz" ]; then
@@ -181,14 +149,12 @@ jobs:
           fi
           checksum=$(shasum -a 256 "$first_tar_gz" | awk '{print $1}')
           echo "checksum_arm=$checksum" >> $GITHUB_ENV
-
       - name: get version of app
         run: |
           nix build .#get_termusix_version_darwin
           version=$(cat result/version.txt)
           echo "version_termusix=$version" >> $GITHUB_ENV
-
-      - name: build the ruby file 
+      - name: build the ruby file
         run: |
           shaArm=${{ env.checksum_arm }}
           shaIntel=${{ env.checksum_intel }}
@@ -198,76 +164,62 @@ jobs:
           echo "version=$version"
           nix develop --command ./scripts/pack_homebrew.sh $shaArm $shaIntel $version
           cat rb_build/termusix.rb
-
       - name: upload ruby file
         uses: actions/upload-artifact@v4
         with:
           name: homebrew-pack-termusix
           path: rb_build/termusix.rb
-
-
   test-from-latest-ubuntu:
-    name : test for linux_x86_64
+    name: test for linux_x86_64
     runs-on: ubuntu-latest
     needs: build-for-linux_x86_64
-    steps: 
-    - uses: actions/download-artifact@v4
-      with:
-        name: termusix-x86_64-linux
-
-    - name: set permissions on package
-      run: chmod +x termusix-x86_64-linux
-
-    - name: Ensure the command runs
-      run: ./termusix-x86_64-linux --version
-
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: termusix-x86_64-linux
+      - name: set permissions on package
+        run: chmod +x termusix-x86_64-linux
+      - name: Ensure the command runs
+        run: ./termusix-x86_64-linux --version
   test-from-apple-arm:
-    name : test for apple ARM
+    name: test for apple ARM
     runs-on: macos-latest
     needs: build-for-apple-arm
-    steps: 
-    - uses: actions/download-artifact@v4
-      with: 
-        name: termusix-aarch64-apple
-
-    - name: set permissions on package
-      run: chmod +x termusix-aarch64-apple
-
-    - name: Ensure the command runs
-      run: ./termusix-aarch64-apple --version
-
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: termusix-aarch64-apple
+      - name: set permissions on package
+        run: chmod +x termusix-aarch64-apple
+      - name: Ensure the command runs
+        run: ./termusix-aarch64-apple --version
   test-from-apple-x86_64:
-    name : test for  x86_64-apple-darwin
+    name: test for  x86_64-apple-darwin
     runs-on: macos-13
     needs: build-for-apple-intel
-    steps: 
-    - uses: actions/download-artifact@v4
-      with: 
-        name: termusix-x86_64-apple
-
-    - name: set permissions on package
-      run: chmod +x termusix-x86_64-apple
-
-    - name: Ensure the command runs
-      run: ./termusix-x86_64-apple --version
-
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: termusix-x86_64-apple
+      - name: set permissions on package
+        run: chmod +x termusix-x86_64-apple
+      - name: Ensure the command runs
+        run: ./termusix-x86_64-apple --version
   test-from-windows:
-    name : test for windows
+    name: test for windows
     runs-on: windows-latest
     needs: build-for-arm-linux-and-windows
-    steps: 
-    - uses: actions/download-artifact@v4
-      with: 
-        name: termusix-x86_64-windows
-
-    - name: Ensure the command runs
-      run: ./termusix-x86_64-windows.exe --version
-
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: termusix-x86_64-windows
+      - name: Ensure the command runs
+        run: ./termusix-x86_64-windows.exe --version
   make-release-group:
     runs-on: ubuntu-latest
     needs:
       - test-from-latest-ubuntu
-      - test-from-apple-arm 
+      - test-from-apple-arm
       - test-from-apple-x86_64
       - test-from-windows
     steps:
@@ -277,12 +229,31 @@ jobs:
           path: release
           pattern: termusix-*
           merge-multiple: true
-
-      - name : List all packages
-        run : ls -R
-
+      - name: List all packages
+        run: ls -R
       - uses: actions/upload-artifact@v4
         with:
           name: release
           path: release
 
+# build-scoop-appmanifest:
+#   name: build scoop app manifest with nix
+#   runs-on: ubuntu-latest
+#   steps:
+#     - uses: actions/checkout@v4
+#     - uses: ./.github/actions/common-setup
+#       with:
+#         cachix_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
+#     - name: Build app manifest
+#       run: nix build .#termusix-appmanifest --show-trace --log-lines 10000
+#
+#     - name: copy app manifest
+#       run: | 
+#         mkdir -p json_file
+#         cp result/termusix.json json_file/termusix.json
+#
+#     - name: upload json file
+#       uses: actions/upload-artifact@v4
+#       with:
+#         name: appmanifest-termusix
+#         path: json_file/termusix.json

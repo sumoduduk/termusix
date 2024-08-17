@@ -2,31 +2,10 @@ name: "Build scoop"
 on:
   workflow_dispatch:
 env:
-  GH_TOKEN: ${{ github.token }}
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
-  # build-scoop-appmanifest:
-  #   name: build scoop app manifest with nix
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: ./.github/actions/common-setup
-  #       with:
-  #         cachix_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
-  #     - name: Build app manifest
-  #       run: nix build .#termusix-appmanifest --show-trace --log-lines 10000
-  #
-  #     - name: copy app manifest
-  #       run: | 
-  #         mkdir -p json_file
-  #         cp result/termusix.json json_file/termusix.json
-  #
-  #     - name: upload json file
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: appmanifest-termusix
-  #         path: json_file/termusix.json
   test-install-with-scoop:
-    name: test install app manifest with scoop
+    name: Test install app manifest with scoop
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,11 +14,11 @@ jobs:
         run: |
           $release = gh release view --json tagName --jq ".tagName"
           echo "Latest release version: $release"
-          echo "::set-output name=version::$release"
+          echo "version=$release" >> $GITHUB_ENV
         shell: pwsh
       - name: Download the latest release file
         run: |
-          $version = "${{ steps.get_latest_release.outputs.version }}"
+          $version = "${{ env.version }}"
           $url = "https://github.com/sumoduduk/termusix/releases/download/$version/termusix-x86_64-windows.exe"
           echo "Downloading file from: $url"
           Invoke-WebRequest -Uri $url -OutFile "termusix-x86_64-windows.exe"
@@ -49,43 +28,43 @@ jobs:
         run: |
           $hash = Get-FileHash -Path "termusix-x86_64-windows.exe" -Algorithm SHA256
           echo "SHA256: $($hash.Hash)"
-          echo "::set-output name=sha256sum::$($hash.Hash)"
+          echo "sha256sum=$($hash.Hash)" >> $GITHUB_ENV
         shell: pwsh
       - name: Write JSON file
         run: |
-          $version = "${{ steps.get_latest_release.outputs.version }}"
-          $sha256sum = "${{ steps.calculate_sha.outputs.sha256sum }}"
+          $version = "${{ env.version }}"
+          $sha256sum = "${{ env.sha256sum }}"
 
-          $jsonContent = @"
-           {
-           "version" : "$version",
-           "homepage": "https://github.com/sumoduduk/termusix",
-           "license": "GPL-3.0",
-           "architecture": {
-             "64bit": {
-               "url": "https://github.com/sumoduduk/termusix/releases/download/v$version/termusix-x86_64-windows.exe#/termusix.exe",
-               "hash": "$sha256sum"
-             }
-           },
-           "bin": "termusix.exe",
-           "checkver": "github",
-           "autoupdate": {
-             "architecture": {
-               "64bit": {
-                 "url": "https://github.com/sumoduduk/termusix/releases/download/v$version/termusix-x86_64-windows.exe#/termusix.exe"
-               }
-             }
-           }
-          }
-           "@
-           $jsonContent | Set-Content -Path "termusix.json"
+          $jsonContent = @'{
+            "version" : "$version",
+            "homepage": "https://github.com/sumoduduk/termusix",
+            "description" : "A terminal-based music player with a user-friendly terminal UI, built with Rust",
+            "license": "GPL-3.0",
+            "architecture": {
+              "64bit": {
+                "url": "https://github.com/sumoduduk/termusix/releases/download/v$version/termusix-x86_64-windows.exe#/termusix.exe",
+                "hash": "$sha256sum"
+              }
+            },
+            "bin": "termusix.exe",
+            "checkver": "github",
+            "autoupdate": {
+              "architecture": {
+                "64bit": {
+                  "url": "https://github.com/sumoduduk/termusix/releases/download/v$version/termusix-x86_64-windows.exe#/termusix.exe"
+                }
+              }
+            }
+          }'@
+
+          $jsonContent | Set-Content -Path "termusix.json"
         shell: pwsh
-      - name: install scoop
+      - name: Install scoop
         uses: MinoruSekine/setup-scoop@v4
-      - name: install termusix
+      - name: Install Termusix
         run: |
           scoop install termusix.json
         shell: pwsh
-      - name: run the app
+      - name: Run the app
         run: termusix.exe --help
         shell: pwsh
