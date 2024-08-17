@@ -70,6 +70,20 @@
                 mkdir -p $out
                 echo ${self.packages.${localSystem}.termusix_x86_64-linux.version} > $out/version.txt
               '';
+
+            zip-termusix-windows =
+              pkgs.runCommand "zip-termusix-windows" {
+                buildInputs = [pkgs.zip];
+              } ''
+                mkdir -p $out
+
+                cp ${termusix_x86_64-windows}/bin/termusix.exe $out/termusix.exe
+
+                cd $out
+
+                zip -j termusix_x86_64-windows-v${termusix_x86_64-windows.version}.zip termusix.exe
+                rm termusix.exe
+              '';
           }
           // (
             if localSystem == "aarch64-darwin"
