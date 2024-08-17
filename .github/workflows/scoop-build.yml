@@ -35,6 +35,20 @@ jobs:
         with:
           name: appmanifest-termusix
 
+      - name: Download file into binaries folder
+        run: |
+          mkdir binaries
+          Invoke-WebRequest `
+            -Uri "https://github.com/sumoduduk/termusix/releases/download/v0.1.1/termusix-x86_64-windows.exe" `
+            -OutFile "binaries/termusix-x86_64-windows.exe"
+        shell: pwsh
+
+      - name: Calculate SHA256 Hash
+        run: |
+          $hash = Get-FileHash -Path "binaries/termusix-x86_64-windows.exe" -Algorithm SHA256
+          Write-Output "SHA256: $($hash.Hash)"
+        shell: pwsh
+
       - name: install scoop
         uses: MinoruSekine/setup-scoop@v4
 
