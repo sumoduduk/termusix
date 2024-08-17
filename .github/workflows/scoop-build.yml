@@ -71,6 +71,14 @@ jobs:
         run: |
           scoop install termusix.json
         shell: pwsh
-      - name: Run the app
-        run: termusix.exe --help
+      - name: Check Termusix Path
+        run: |
+          $env:PATH
+          where termusix.exe
+        shell: pwsh
+      - name: Run Termusix with --help
+        run: |
+          termusix --version
+          termusix --help > output.txt
+          Get-Content -Path output.txt
         shell: pwsh
