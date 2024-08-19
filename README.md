@@ -1,5 +1,8 @@
 # Termusix Player
 
+[![Version info](https://img.shields.io/crates/v/termusix.svg)](https://crates.io/crates/termusix)
+[![CICD](https://github.com/sumoduduk/termusix/actions/workflows/nix-build.yml/badge.svg)](https://github.com/sumoduduk/termusix/actions/workflows/nix-build.yml)
+
 ![termusix](./assets/termusix.webp)
 
 A terminal-based music player with a user-friendly terminal UI, built with Rust.
